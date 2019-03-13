@@ -21,6 +21,11 @@ public:
 	GLuint CreateBmpTexture(char * filePath);
 	   
 	void Test();
+	void Lecture2();
+
+	void CreateVBOQuads(int count);
+	void DrawQuads();
+
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
@@ -37,5 +42,10 @@ private:
 
 	GLuint m_VBORect = 0;
 	GLuint m_SolidRectShader = 0;
+
+	GLuint m_VBOLecture2 = 0;
+	
+	GLuint m_VBOQuads = 0;
+	int m_QuadsCnt = 0;
 };
 

@@ -4,6 +4,8 @@
 #include <Windows.h>
 #include <cstdlib>
 #include <cassert>
+#include <vector>
+#include <cstdlib>
 
 Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
@@ -40,6 +42,20 @@ void Renderer::CreateVertexBufferObjects()
 	glGenBuffers(1, &m_VBORect);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
+
+	// lecture2
+	float triangleVertex[]
+		=
+	{
+		-1.0, -0.0, 0.f, 0.0, 1.0, 0.f, 1.0, 0.0, 0.f // 9 floats
+	};
+
+	glGenBuffers(1, &m_VBOLecture2); // 개수는 하나
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOLecture2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertex), triangleVertex, GL_STATIC_DRAW); // memory copy가 일어나서 생각보다 느림. 따라서 GPU에 올리는 타이밍을 잘 설정해야 한다.
+
+	m_QuadsCnt = 1000;
+	CreateVBOQuads(m_QuadsCnt);
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -279,4 +295,76 @@ void Renderer::Test()
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glDisableVertexAttribArray(attribPosition);
+}
+
+void Renderer::Lecture2()
+{
+	glUseProgram(m_SolidRectShader); // 쉐이더 아직 안쓰니까 넘어감
+	glEnableVertexAttribArray(0); // 0이 뭔지 아직 안알아도 됨
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOLecture2);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // 0이라는 것은 glEnableVertexAttribArray에 0넣어서
+
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+
+	glDisableVertexAttribArray(0);
+}
+
+void Renderer::CreateVBOQuads(int count)
+{
+	std::vector<float> quads;
+	quads.reserve(4 * 6 * count);
+	float quad_size = 0.01f;
+
+	for (int i = 0; i < count; ++i)
+	{
+		// triangle 1
+		float randx = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);
+		float randy = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);
+		quads.emplace_back(randx);
+		quads.emplace_back(randy);
+		quads.emplace_back(0);
+		quads.emplace_back((float)i);
+
+		quads.emplace_back(randx + quad_size);
+		quads.emplace_back(randy);
+		quads.emplace_back(0);
+		quads.emplace_back((float)i);
+
+		quads.emplace_back(randx);
+		quads.emplace_back(randy + quad_size);
+		quads.emplace_back(0);
+		quads.emplace_back((float)i);
+
+		// triangle 2
+		quads.emplace_back(randx + quad_size);
+		quads.emplace_back(randy);
+		quads.emplace_back(0);
+		quads.emplace_back((float)i);
+
+		quads.emplace_back(randx);
+		quads.emplace_back(randy + quad_size);
+		quads.emplace_back(0);
+		quads.emplace_back((float)i);
+
+		quads.emplace_back(randx + quad_size);
+		quads.emplace_back(randy + quad_size);
+		quads.emplace_back(0);
+		quads.emplace_back((float)i);
+	}
+
+	glGenBuffers(1, &m_VBOQuads);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
+	glBufferData(GL_ARRAY_BUFFER, quads.size() * sizeof(float), quads.data(), GL_STATIC_DRAW);
+}
+
+void Renderer::DrawQuads()
+{
+	glUseProgram(m_SolidRectShader); // 쉐이더 아직 안쓰니까 넘어감
+	glEnableVertexAttribArray(0); // 0이 뭔지 아직 안알아도 됨
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0); // 0이라는 것은 glEnableVertexAttribArray에 0넣어서
+
+	glDrawArrays(GL_TRIANGLES, 0, 6 * m_QuadsCnt);
+
+	glDisableVertexAttribArray(0);
 }
