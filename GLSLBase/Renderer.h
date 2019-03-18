@@ -20,11 +20,14 @@ public:
 	GLuint CreatePngTexture(char * filePath);
 	GLuint CreateBmpTexture(char * filePath);
 	   
-	void Test();
+	void Lecture1();
 	void Lecture2();
+	void Lecture3();
 
 	void CreateVBOQuads(int count);
 	void DrawQuads();
+
+	void CreateGridMesh();
 
 
 private:
@@ -47,5 +50,8 @@ private:
 	
 	GLuint m_VBOQuads = 0;
 	int m_QuadsCnt = 0;
+
+	GLuint m_VBOGridMesh = 0;
+	int m_VBOGridMesh_Count = 0;
 };
 
