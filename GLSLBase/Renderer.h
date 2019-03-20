@@ -20,7 +20,7 @@ public:
 	GLuint CreatePngTexture(char * filePath);
 	GLuint CreateBmpTexture(char * filePath);
 	   
-	void Lecture1();
+	void Test();
 	void Lecture2();
 	void Lecture3();
 
@@ -44,6 +44,7 @@ private:
 	unsigned int m_WindowSizeY = 0;
 
 	GLuint m_VBORect = 0;
+	GLuint m_VBORectColor = 0;
 	GLuint m_SolidRectShader = 0;
 
 	GLuint m_VBOLecture2 = 0;
@@ -53,5 +54,6 @@ private:
 
 	GLuint m_VBOGridMesh = 0;
 	int m_VBOGridMesh_Count = 0;
+
 };
 

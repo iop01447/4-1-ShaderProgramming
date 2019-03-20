@@ -32,16 +32,36 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 void Renderer::CreateVertexBufferObjects()
 {
+	float size = 0.02f;
 	float rect[]
 		=
 	{
-		-0.5, -0.5, 0.f, -0.5, 0.5, 0.f, 0.5, 0.5, 0.f, //Triangle1
-		-0.5, -0.5, 0.f,  0.5, 0.5, 0.f, 0.5, -0.5, 0.f, //Triangle2
+		-size, -size, 0.f, 0.5f, // x, y, z, something
+		-size, size, 0.f, 0.5f,
+		size, size, 0.f, 0.5f, //Triangle1
+		-size, -size, 0.f, 0.5f,
+		size, size, 0.f, 0.5f,
+		size, -size, 0.f, 0.5f //Triangle2
 	};
 
 	glGenBuffers(1, &m_VBORect);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
+
+	float color[]
+		=
+	{
+		1, 0, 0, 1,// r, g, b, a
+		1, 0, 0, 1,
+		1, 0, 0, 1,
+		1, 0, 0, 1,
+		1, 0, 0, 1,
+		1, 0, 0, 1
+	};
+
+	glGenBuffers(1, &m_VBORectColor);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectColor);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
 
 	// lecture2
 	float triangleVertex[]
@@ -285,18 +305,36 @@ GLuint Renderer::CreateBmpTexture(char * filePath)
 	return temp;
 }
 
-void Renderer::Lecture1()
+void Renderer::Test()
 {
 	glUseProgram(m_SolidRectShader);
 
-	int attribPosition = glGetAttribLocation(m_SolidRectShader, "a_Position");
-	glEnableVertexAttribArray(attribPosition);
+	GLuint uTime = glGetUniformLocation(m_SolidRectShader, "u_Time");
+	static float time = 1.f;
+	static float addValue = 0.01;
+	time += addValue;
+	if (time > 1)
+		time = 0;
+	
+	glUniform1f(uTime, time); // float 포인트 하나
+	
+
+	GLuint aPos = glGetAttribLocation(m_SolidRectShader, "a_Position");
+	GLuint aCol = glGetAttribLocation(m_SolidRectShader, "a_Color"); // color가 사용되고 있지 않아서 의미없는 값이 리턴됨
+
+	glEnableVertexAttribArray(aPos);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
-	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	glVertexAttribPointer(aPos, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
+
+	glEnableVertexAttribArray(aCol);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectColor);
+	glVertexAttribPointer(aCol, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	glDisableVertexAttribArray(attribPosition);
+	glDisableVertexAttribArray(aPos);
+	glDisableVertexAttribArray(aCol);
+
 }
 
 void Renderer::Lecture2()
@@ -304,7 +342,7 @@ void Renderer::Lecture2()
 	glUseProgram(m_SolidRectShader); // 쉐이더 아직 안쓰니까 넘어감
 	glEnableVertexAttribArray(0); // 0이 뭔지 아직 안알아도 됨
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOLecture2);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // 0이라는 것은 glEnableVertexAttribArray에 0넣어서
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // 첫번째 인자가 0이라는 것은 glEnableVertexAttribArray에 0넣어서
 
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 
