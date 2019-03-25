@@ -23,6 +23,7 @@ public:
 	void Test();
 	void Lecture2();
 	void Lecture3();
+	void Lecture4();
 
 	void CreateVBOQuads(int count);
 	void DrawQuads();
@@ -46,6 +47,7 @@ private:
 	GLuint m_VBORect = 0;
 	GLuint m_VBORectColor = 0;
 	GLuint m_SolidRectShader = 0;
+	GLuint m_SimpleVelShader = 0;
 
 	GLuint m_VBOLecture2 = 0;
 	

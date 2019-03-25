@@ -6,6 +6,7 @@
 #include <cassert>
 #include <vector>
 #include <cstdlib>
+#include <time.h>
 
 Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
@@ -24,8 +25,9 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_WindowSizeY = windowSizeY;
 
 	//Load shaders
-	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
-	
+	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs"); // 셰이더 프로그램 아이디
+	m_SimpleVelShader = CompileShaders("./Shaders/SimpleVel.vs", "./Shaders/SimpleVel.fs");
+
 	//Create VBOs
 	CreateVertexBufferObjects();
 }
@@ -361,47 +363,91 @@ void Renderer::Lecture3()
 	glDisableVertexAttribArray(0);
 }
 
+void Renderer::Lecture4()
+{
+	glUseProgram(m_SimpleVelShader); 
+
+	GLuint uTime = glGetUniformLocation(m_SimpleVelShader, "u_Time");
+	static float time = 0;
+	time += 0.01;
+	//if (time > 2)
+		//time = 0;
+	glUniform1f(uTime, time);
+
+	GLuint aPos = glGetAttribLocation(m_SimpleVelShader, "a_Position");
+	GLuint aVel = glGetUniformLocation(m_SimpleVelShader, "a_Vel");
+
+	glEnableVertexAttribArray(aPos); // Test: 이 함수에 들어갈 것은? 
+	glEnableVertexAttribArray(aVel);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (GLvoid*)(sizeof(float)*3));
+
+	glDrawArrays(GL_TRIANGLES, 0, 6 * m_QuadsCnt); // GL_LINE_STRIP
+	
+	glDisableVertexAttribArray(aPos);
+	glDisableVertexAttribArray(aVel);
+}
+
 void Renderer::CreateVBOQuads(int count)
 {
 	std::vector<float> quads;
-	quads.reserve(4 * 6 * count);
+	quads.reserve(6 * 6 * count); // 버텍스 개수 * 버텍스 구성 요소 * 사각형 개수 
 	float quad_size = 0.01f;
 
 	for (int i = 0; i < count; ++i)
 	{
-		// triangle 1
 		float randx = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);
 		float randy = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);
+
+		// 6개의 버텍스에 동일한 속도 주기
+		float randVelx = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);
+		float randVely = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);
+		float randVelz = 0.f;
+
+		// triangle 1
 		quads.emplace_back(randx);
 		quads.emplace_back(randy);
 		quads.emplace_back(0);
-		quads.emplace_back((float)i);
+		quads.emplace_back(randVelx);
+		quads.emplace_back(randVely);
+		quads.emplace_back(randVelz);
 
 		quads.emplace_back(randx + quad_size);
 		quads.emplace_back(randy);
 		quads.emplace_back(0);
-		quads.emplace_back((float)i);
+		quads.emplace_back(randVelx);
+		quads.emplace_back(randVely);
+		quads.emplace_back(randVelz);
 
 		quads.emplace_back(randx);
 		quads.emplace_back(randy + quad_size);
 		quads.emplace_back(0);
-		quads.emplace_back((float)i);
+		quads.emplace_back(randVelx);
+		quads.emplace_back(randVely);
+		quads.emplace_back(randVelz);
 
 		// triangle 2
 		quads.emplace_back(randx + quad_size);
 		quads.emplace_back(randy);
 		quads.emplace_back(0);
-		quads.emplace_back((float)i);
+		quads.emplace_back(randVelx);
+		quads.emplace_back(randVely);
+		quads.emplace_back(randVelz);
 
 		quads.emplace_back(randx);
 		quads.emplace_back(randy + quad_size);
 		quads.emplace_back(0);
-		quads.emplace_back((float)i);
+		quads.emplace_back(randVelx);
+		quads.emplace_back(randVely);
+		quads.emplace_back(randVelz);
 
 		quads.emplace_back(randx + quad_size);
 		quads.emplace_back(randy + quad_size);
 		quads.emplace_back(0);
-		quads.emplace_back((float)i);
+		quads.emplace_back(randVelx);
+		quads.emplace_back(randVely);
+		quads.emplace_back(randVelz);
 	}
 
 	glGenBuffers(1, &m_VBOQuads);
@@ -435,7 +481,9 @@ void Renderer::CreateGridMesh()
 	float height = targetPosY - basePosY;
 
 	float* point = new float[pointCountX*pointCountY * 2];
-	float* vertices = new float[(pointCountX - 1)*(pointCountY - 1) * 2 * 3 * 3];
+	std::vector<float> vertices;
+	vertices.reserve((pointCountX - 1)*(pointCountY - 1) * 2 * 3 * 3);
+	//float* vertices = new float[(pointCountX - 1)*(pointCountY - 1) * 2 * 3 * 3];
 	m_VBOGridMesh_Count = (pointCountX - 1)*(pointCountY - 1) * 2 * 3;
 
 	//Prepare points
@@ -449,55 +497,37 @@ void Renderer::CreateGridMesh()
 	}
 
 	//Make triangles
-	int vertIndex = 0;
 	for (int x = 0; x < pointCountX - 1; x++)
 	{
 		for (int y = 0; y < pointCountY - 1; y++)
 		{
 			//Triangle part 1
-			vertices[vertIndex] = point[(y*pointCountX + x) * 2 + 0];
-			vertIndex++;
-			vertices[vertIndex] = point[(y*pointCountX + x) * 2 + 1];
-			vertIndex++;
-			vertices[vertIndex] = 0.f;
-			vertIndex++;
-			vertices[vertIndex] = point[((y + 1)*pointCountX + (x + 1)) * 2 + 0];
-			vertIndex++;
-			vertices[vertIndex] = point[((y + 1)*pointCountX + (x + 1)) * 2 + 1];
-			vertIndex++;
-			vertices[vertIndex] = 0.f;
-			vertIndex++;
-			vertices[vertIndex] = point[((y + 1)*pointCountX + x) * 2 + 0];
-			vertIndex++;
-			vertices[vertIndex] = point[((y + 1)*pointCountX + x) * 2 + 1];
-			vertIndex++;
-			vertices[vertIndex] = 0.f;
-			vertIndex++;
+			vertices.push_back(point[(y*pointCountX + x) * 2 + 0]);
+			vertices.push_back(point[(y*pointCountX + x) * 2 + 1]);
+			vertices.push_back(0.f);
+
+			vertices.push_back(point[((y + 1)*pointCountX + (x + 1)) * 2 + 0]);
+			vertices.push_back(point[((y + 1)*pointCountX + (x + 1)) * 2 + 1]);
+			vertices.push_back(0.f);
+			vertices.push_back(point[((y + 1)*pointCountX + x) * 2 + 0]);
+			vertices.push_back(point[((y + 1)*pointCountX + x) * 2 + 1]);
+			vertices.push_back(0.f);
 
 			//Triangle part 2
-			vertices[vertIndex] = point[(y*pointCountX + x) * 2 + 0];
-			vertIndex++;
-			vertices[vertIndex] = point[(y*pointCountX + x) * 2 + 1];
-			vertIndex++;
-			vertices[vertIndex] = 0.f;
-			vertIndex++;
-			vertices[vertIndex] = point[(y*pointCountX + (x + 1)) * 2 + 0];
-			vertIndex++;
-			vertices[vertIndex] = point[(y*pointCountX + (x + 1)) * 2 + 1];
-			vertIndex++;
-			vertices[vertIndex] = 0.f;
-			vertIndex++;
-			vertices[vertIndex] = point[((y + 1)*pointCountX + (x + 1)) * 2 + 0];
-			vertIndex++;
-			vertices[vertIndex] = point[((y + 1)*pointCountX + (x + 1)) * 2 + 1];
-			vertIndex++;
-			vertices[vertIndex] = 0.f;
-			vertIndex++;
+			vertices.push_back(point[(y*pointCountX + x) * 2 + 0]);
+			vertices.push_back(point[(y*pointCountX + x) * 2 + 1]);
+			vertices.push_back(0.f);
+			vertices.push_back(point[(y*pointCountX + (x + 1)) * 2 + 0]);
+			vertices.push_back(point[(y*pointCountX + (x + 1)) * 2 + 1]);
+			vertices.push_back(0.f);
+			vertices.push_back(point[((y + 1)*pointCountX + (x + 1)) * 2 + 0]);
+			vertices.push_back(point[((y + 1)*pointCountX + (x + 1)) * 2 + 1]);
+			vertices.push_back(0.f);
 		}
 	}
 
 	glGenBuffers(1, &m_VBOGridMesh);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOGridMesh);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(pointCountX - 1)*(pointCountY - 1) * 2 * 3 * 3, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(pointCountX - 1)*(pointCountY - 1) * 2 * 3 * 3, vertices.data(), GL_STATIC_DRAW);
 }
 
