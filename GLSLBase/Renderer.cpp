@@ -375,7 +375,7 @@ void Renderer::Lecture4()
 	glUniform1f(uTime, time);
 
 	GLuint aPos = glGetAttribLocation(m_SimpleVelShader, "a_Position");
-	GLuint aVel = glGetUniformLocation(m_SimpleVelShader, "a_Vel");
+	GLuint aVel = glGetAttribLocation(m_SimpleVelShader, "a_Vel");
 
 	glEnableVertexAttribArray(aPos); // Test: 이 함수에 들어갈 것은? 
 	glEnableVertexAttribArray(aVel);
