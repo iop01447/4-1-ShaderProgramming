@@ -27,6 +27,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Load shaders
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs"); // 셰이더 프로그램 아이디
 	m_SimpleVelShader = CompileShaders("./Shaders/SimpleVel.vs", "./Shaders/SimpleVel.fs");
+	m_SinTailsShader = CompileShaders("./Shaders/SinTails.vs", "./Shaders/SinTails.fs");
 
 	//Create VBOs
 	CreateVertexBufferObjects();
@@ -77,7 +78,7 @@ void Renderer::CreateVertexBufferObjects()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertex), triangleVertex, GL_STATIC_DRAW); // memory copy가 일어나서 생각보다 느림. 따라서 GPU에 올리는 타이밍을 잘 설정해야 한다.
 
 	m_QuadsCnt = 1000;
-	CreateVBOQuads(m_QuadsCnt);
+	CreateVBOQuads(m_QuadsCnt, false, 0, 0, 0);
 
 	CreateGridMesh();
 }
@@ -363,7 +364,7 @@ void Renderer::Lecture3()
 	glDisableVertexAttribArray(0);
 }
 
-void Renderer::Lecture4()
+void Renderer::Lecture3_2()
 {
 	glUseProgram(m_SimpleVelShader); 
 
@@ -389,7 +390,7 @@ void Renderer::Lecture4()
 	glDisableVertexAttribArray(aVel);
 }
 
-void Renderer::Lecture5()
+void Renderer::Lecture3_3()
 {
 	glUseProgram(m_SimpleVelShader);
 
@@ -420,7 +421,38 @@ void Renderer::Lecture5()
 	glDisableVertexAttribArray(aStartLife);
 }
 
-void Renderer::CreateVBOQuads(int count)
+void Renderer::Lecture3_4()
+{
+	glUseProgram(m_SinTailsShader);
+
+	GLuint uTime = glGetUniformLocation(m_SinTailsShader, "u_Time");
+	GLuint uRepeat = glGetUniformLocation(m_SinTailsShader, "u_Repeat");
+
+	static float time = 0;
+	time += 0.01;
+	glUniform1f(uTime, time);
+	//glUniform1f(uRepeat, true);
+
+	GLuint aPos = glGetAttribLocation(m_SinTailsShader, "a_Position");
+	GLuint aVel = glGetAttribLocation(m_SinTailsShader, "a_Vel");
+	GLuint aStartLife = glGetAttribLocation(m_SinTailsShader, "a_StartLife");
+
+	glEnableVertexAttribArray(aPos); // Test: 이 함수에 들어갈 것은? 
+	glEnableVertexAttribArray(aVel);
+	glEnableVertexAttribArray(aStartLife);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
+	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(aStartLife, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 6));
+
+	glDrawArrays(GL_TRIANGLES, 0, 6 * m_QuadsCnt); // GL_LINE_STRIP
+
+	glDisableVertexAttribArray(aPos);
+	glDisableVertexAttribArray(aVel);
+	glDisableVertexAttribArray(aStartLife);
+}
+
+void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float z)
 {
 	float quad_size = 0.01f;
 	int countQuad = count;
@@ -431,9 +463,16 @@ void Renderer::CreateVBOQuads(int count)
 
 	for (int i = 0; i < count; ++i)
 	{
-		float randx = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);
-		float randy = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);
-
+		float randx = 0;
+		float randy = 0;
+		if (is_random) {
+			randx = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);
+			randy = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);
+		}
+		else {
+			randx = x;
+			randy = y;
+		}
 		// 6개의 버텍스에 동일한 속도 주기
 		float randVelx = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);
 		float randVely = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);

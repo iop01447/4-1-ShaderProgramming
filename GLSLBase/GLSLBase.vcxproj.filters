@@ -41,6 +41,12 @@
     <None Include="Shaders\SimpleVel.vs">
       <Filter>Shader</Filter>
     </None>
+    <None Include="Shaders\SinTails.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\SinTails.vs">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

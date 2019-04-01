@@ -23,10 +23,11 @@ public:
 	void Test();
 	void Lecture2();
 	void Lecture3();
-	void Lecture4();
-	void Lecture5();
+	void Lecture3_2();
+	void Lecture3_3();
+	void Lecture3_4();
 
-	void CreateVBOQuads(int count);
+	void CreateVBOQuads(int count, bool is_random, float x = 0, float y = 0, float z = 0);
 	//void AddPoints(std::vector<float>& v);
 	void DrawQuads();
 
@@ -50,6 +51,7 @@ private:
 	GLuint m_VBORectColor = 0;
 	GLuint m_SolidRectShader = 0;
 	GLuint m_SimpleVelShader = 0;
+	GLuint m_SinTailsShader = 0;
 
 	GLuint m_VBOLecture2 = 0;
 	
