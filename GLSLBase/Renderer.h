@@ -51,7 +51,7 @@ private:
 	GLuint m_VBORectColor = 0;
 	GLuint m_SolidRectShader = 0;
 	GLuint m_SimpleVelShader = 0;
-	GLuint m_SinTailsShader = 0;
+	GLuint m_SinTrailShader = 0;
 
 	GLuint m_VBOLecture2 = 0;
 	

@@ -1,21 +1,27 @@
 #version 450
 
 in vec3 a_Position;
-in vec3 a_Vel;
-in vec2 a_StartLife;
+in vec4 a_StartLifePerAmp; // Period Amplitude
 
 uniform float u_Time;
-uniform bool u_Repeat = true;
 
-const vec3 c_Gravity = vec3(0, -5, 0);
+const float PI = 3.141592;
 
 void main()
 {
 	vec3 newPos = a_Position.xyz;
-	float startTime = a_StartLife.x;
-	float lifeTime = a_StartLife.y;
 
-	float newTime = u_Time - startTime; //fract(u_Time); 
+	float startTime = a_StartLifePerAmp.x;
+	float lifeTime = a_StartLifePerAmp.y;
+	float period = a_StartLifePerAmp.z;
+	float amplitude = a_StartLifePerAmp.w;
+
+	float newTime = u_Time - startTime;
+	//float newTime = fract(u_Time);
+
+	newPos.x += newTime;
+	newPos.y += sin(newTime * PI * period) * amplitude;
+
 	float life = newTime;
 	float remainingLife = lifeTime - life;
 

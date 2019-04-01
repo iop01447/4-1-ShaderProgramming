@@ -175,8 +175,8 @@
   <ItemGroup>
     <None Include="Shaders\SimpleVel.fs" />
     <None Include="Shaders\SimpleVel.vs" />
-    <None Include="Shaders\SinTails.fs" />
-    <None Include="Shaders\SinTails.vs" />
+    <None Include="Shaders\SinTrail.fs" />
+    <None Include="Shaders\SinTrail.vs" />
     <None Include="Shaders\SolidRect.fs" />
     <None Include="Shaders\SolidRect.vs" />
   </ItemGroup>

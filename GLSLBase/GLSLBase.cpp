@@ -31,7 +31,7 @@ void RenderScene(void)
 	//g_Renderer->DrawQuads();
 	//g_Renderer->Lecture3();
 	//g_Renderer->Lecture4();
-	g_Renderer->Lecture3_3();
+	g_Renderer->Lecture3_4();
 
 	glutSwapBuffers();
 }

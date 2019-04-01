@@ -41,10 +41,10 @@
     <None Include="Shaders\SimpleVel.vs">
       <Filter>Shader</Filter>
     </None>
-    <None Include="Shaders\SinTails.fs">
+    <None Include="Shaders\SinTrail.fs">
       <Filter>Shader</Filter>
     </None>
-    <None Include="Shaders\SinTails.vs">
+    <None Include="Shaders\SinTrail.vs">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>
