@@ -7,11 +7,13 @@ in vec4 a_StartLifeRatioAmp; // Ratio Amplitude
 uniform float u_Time;
 
 const float PI = 3.141592;
-const mat3 c_RP = mat3(0, -1, 0, 1, 0, 0, 0, 0, 0); // 90% 회전
+const mat3 c_RP = mat3(0, -1, 0, 1, 0, 0, 0, 0, 0); // 90도 회전
+const vec3 c_Gravity = vec3(0, -1, 0);
 
 void main()
 {
 	vec3 newPos = a_Position.xyz;
+	vec3 newVel = a_Vel.xyz;
 
 	float startTime = a_StartLifeRatioAmp.x;
 	float lifeTime = a_StartLifeRatioAmp.y;
@@ -22,10 +24,13 @@ void main()
 
 	if(newTime > 0)
 	{
-		amp = amp * newTime * newTime;
+		//amp = amp * newTime * newTime;
 
 		newTime = mod(newTime, lifeTime);
-		newPos += a_Vel * newTime;
+
+		newVel += c_Gravity * newTime;
+
+		newPos += a_Vel * newTime + 0.5 * c_Gravity * newTime * newTime; // 초기속도가 들어가야 함
 
 		vec3 vSin = a_Vel * c_RP;
 		newPos += vSin * sin(newTime * PI * 2 * ratio) * amp; // 주기) * 폭
