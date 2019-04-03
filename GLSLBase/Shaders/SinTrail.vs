@@ -7,6 +7,7 @@ in vec4 a_StartLifeRatioAmp; // Ratio Amplitude
 uniform float u_Time;
 
 const float PI = 3.141592;
+const mat3 c_RP = mat3(0, -1, 0, 1, 0, 0, 0, 0, 0); // 90% 雀傈
 
 void main()
 {
@@ -21,11 +22,13 @@ void main()
 
 	if(newTime > 0)
 	{
-		newTime = mod(newTime, lifeTime);
-
 		amp = amp * newTime * newTime;
-		newPos.x += newTime;
-		newPos.y += sin(newTime * 2 * PI * ratio) * amp; // sin 救率捞 林扁, 官冰率捞 气
+
+		newTime = mod(newTime, lifeTime);
+		newPos += a_Vel * newTime;
+
+		vec3 vSin = a_Vel * c_RP;
+		newPos += vSin * sin(newTime * PI * 2 * ratio) * amp; // 林扁) * 气
 	}
 	else
 	{
