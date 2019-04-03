@@ -15,8 +15,6 @@ const float radius = 0.5;
 void main()
 {
 	vec3 newPos = a_Position.xyz;
-	newPos.x += radius * cos(a_Theta);
-	newPos.y += radius * sin(a_Theta);
 	vec3 newVel = a_Vel.xyz;
 
 	float startTime = a_StartLifeRatioAmp.x;
@@ -29,6 +27,8 @@ void main()
 	if(newTime > 0)
 	{
 		//amp = amp * newTime * newTime;
+		newPos.x += cos(a_Theta);
+		newPos.y += sin(a_Theta);
 
 		newTime = mod(newTime, lifeTime);
 
@@ -37,7 +37,7 @@ void main()
 		newPos += a_Vel * newTime + 0.5 * c_Gravity * newTime * newTime; // 초기속도가 들어가야 함
 
 		vec3 vSin = a_Vel * c_RP;
-		newPos += vSin * sin(newTime * PI * 2 * ratio) * amp; // 주기) * 폭
+		//newPos += vSin * sin(newTime * PI * 2 * ratio) * amp; // 주기) * 폭
 	}
 	else
 	{

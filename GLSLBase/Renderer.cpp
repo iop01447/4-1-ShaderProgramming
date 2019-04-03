@@ -77,7 +77,7 @@ void Renderer::CreateVertexBufferObjects()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOLecture2);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertex), triangleVertex, GL_STATIC_DRAW); // memory copy가 일어나서 생각보다 느림. 따라서 GPU에 올리는 타이밍을 잘 설정해야 한다.
 
-	m_QuadsCnt = 1000; //1000
+	m_QuadsCnt = 100000; //1000
 	CreateVBOQuads(m_QuadsCnt, false, 0, 0, 0);
 
 	CreateGridMesh();
