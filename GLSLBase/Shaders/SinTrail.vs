@@ -3,16 +3,20 @@
 in vec3 a_Position;
 in vec3 a_Vel;
 in vec4 a_StartLifeRatioAmp; // Ratio Amplitude
+in float a_Theta;
 
 uniform float u_Time;
 
 const float PI = 3.141592;
 const mat3 c_RP = mat3(0, -1, 0, 1, 0, 0, 0, 0, 0); // 90µµ È¸Àü
 const vec3 c_Gravity = vec3(0, -1, 0);
+const float radius = 0.5;
 
 void main()
 {
 	vec3 newPos = a_Position.xyz;
+	newPos.x += radius * cos(a_Theta);
+	newPos.y += radius * sin(a_Theta);
 	vec3 newVel = a_Vel.xyz;
 
 	float startTime = a_StartLifeRatioAmp.x;

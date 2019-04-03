@@ -435,27 +435,33 @@ void Renderer::Lecture3_4()
 	GLuint aPos = glGetAttribLocation(shader, "a_Position");
 	GLuint aVel = glGetAttribLocation(shader, "a_Vel");
 	GLuint aStartLifeRatioAmp = glGetAttribLocation(shader, "a_StartLifeRatioAmp");
+	GLuint aTheta = glGetAttribLocation(shader, "a_Theta");
+
 
 	glEnableVertexAttribArray(aPos); // Test: 이 함수에 들어갈 것은? 
 	glEnableVertexAttribArray(aVel);
 	glEnableVertexAttribArray(aStartLifeRatioAmp);
+	glEnableVertexAttribArray(aTheta);
+
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
-	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 10, 0);
-	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 10, (GLvoid*)(sizeof(float) * 3));
-	glVertexAttribPointer(aStartLifeRatioAmp, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 10, (GLvoid*)(sizeof(float) * 6));
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 11, 0);
+	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(aStartLifeRatioAmp, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (GLvoid*)(sizeof(float) * 6));
+	glVertexAttribPointer(aTheta, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (GLvoid*)(sizeof(float) * 10));
 
 	glDrawArrays(GL_TRIANGLES, 0, 6 * m_QuadsCnt); // GL_LINE_STRIP
 
 	glDisableVertexAttribArray(aPos);
 	glDisableVertexAttribArray(aVel);
 	glDisableVertexAttribArray(aStartLifeRatioAmp);
+	glDisableVertexAttribArray(aTheta);
 }
 
 void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float z)
 {
 	float quad_size = 0.01f;
 	int countQuad = count;
-	int verticesPerQuad = 10;
+	int verticesPerQuad = 11;
 	int floatsPerVertex = 3 + 3 + 2;
 	std::vector<float> quads;
 	quads.reserve(countQuad * verticesPerQuad * floatsPerVertex); // 버텍스 개수 * 버텍스 구성 요소 * 사각형 개수 
@@ -485,6 +491,8 @@ void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float
 		float randRatio = 4 * ((float)rand() / (float)RAND_MAX);
 		float randAmplitude = 0.2 * ((float)rand() / (float)RAND_MAX);
 
+		float randTheta = 2 * 3.14 * ((float)rand() / (float)RAND_MAX);
+
 		// triangle 1
 		quads.emplace_back(randx);
 		quads.emplace_back(randy);
@@ -496,6 +504,7 @@ void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float
 		quads.emplace_back(lifeTime);
 		quads.emplace_back(randRatio);
 		quads.emplace_back(randAmplitude);
+		quads.emplace_back(randTheta);
 
 		quads.emplace_back(randx + quad_size);
 		quads.emplace_back(randy);
@@ -507,6 +516,7 @@ void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float
 		quads.emplace_back(lifeTime);
 		quads.emplace_back(randRatio);
 		quads.emplace_back(randAmplitude);
+		quads.emplace_back(randTheta);
 
 		quads.emplace_back(randx);
 		quads.emplace_back(randy + quad_size);
@@ -518,6 +528,7 @@ void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float
 		quads.emplace_back(lifeTime);
 		quads.emplace_back(randRatio);
 		quads.emplace_back(randAmplitude);
+		quads.emplace_back(randTheta);
 
 		// triangle 2
 		quads.emplace_back(randx + quad_size);
@@ -530,6 +541,7 @@ void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float
 		quads.emplace_back(lifeTime);
 		quads.emplace_back(randRatio);
 		quads.emplace_back(randAmplitude);
+		quads.emplace_back(randTheta);
 
 		quads.emplace_back(randx);
 		quads.emplace_back(randy + quad_size);
@@ -541,6 +553,7 @@ void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float
 		quads.emplace_back(lifeTime);
 		quads.emplace_back(randRatio);
 		quads.emplace_back(randAmplitude);
+		quads.emplace_back(randTheta);
 
 		quads.emplace_back(randx + quad_size);
 		quads.emplace_back(randy + quad_size);
@@ -552,6 +565,7 @@ void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float
 		quads.emplace_back(lifeTime);
 		quads.emplace_back(randRatio);
 		quads.emplace_back(randAmplitude);
+		quads.emplace_back(randTheta);
 	}
 
 	glGenBuffers(1, &m_VBOQuads);
