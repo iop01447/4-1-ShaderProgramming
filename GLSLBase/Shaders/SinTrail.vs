@@ -7,6 +7,10 @@ uniform float u_Time;
 
 const float PI = 3.141592;
 
+uniform bool u_Repeat = true;
+const vec3 c_Gravity = vec3(0, -5, 0);
+in vec3 a_Vel;
+
 void main()
 {
 	vec3 newPos = a_Position.xyz;

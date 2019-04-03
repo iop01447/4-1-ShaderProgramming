@@ -433,21 +433,21 @@ void Renderer::Lecture3_4()
 	glUniform1f(uTime, time);
 
 	GLuint aPos = glGetAttribLocation(shader, "a_Position");
-//	GLuint aVel = glGetAttribLocation(shader, "a_Vel");
+	GLuint aVel = glGetAttribLocation(shader, "a_Vel");
 	GLuint aStartLifePerAmp = glGetAttribLocation(shader, "a_StartLifePerAmp");
 
 	glEnableVertexAttribArray(aPos); // Test: 이 함수에 들어갈 것은? 
-//	glEnableVertexAttribArray(aVel);
+	glEnableVertexAttribArray(aVel);
 	glEnableVertexAttribArray(aStartLifePerAmp);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
 	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 10, 0);
-//	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 10, (GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 10, (GLvoid*)(sizeof(float) * 3));
 	glVertexAttribPointer(aStartLifePerAmp, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 10, (GLvoid*)(sizeof(float) * 6));
 
 	glDrawArrays(GL_TRIANGLES, 0, 6 * m_QuadsCnt); // GL_LINE_STRIP
 
 	glDisableVertexAttribArray(aPos);
-//	glDisableVertexAttribArray(aVel);
+	glDisableVertexAttribArray(aVel);
 	glDisableVertexAttribArray(aStartLifePerAmp);
 }
 
