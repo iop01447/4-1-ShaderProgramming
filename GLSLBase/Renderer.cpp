@@ -77,7 +77,7 @@ void Renderer::CreateVertexBufferObjects()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOLecture2);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertex), triangleVertex, GL_STATIC_DRAW); // memory copy가 일어나서 생각보다 느림. 따라서 GPU에 올리는 타이밍을 잘 설정해야 한다.
 
-	m_QuadsCnt = 10; //1000
+	m_QuadsCnt = 1000; //1000
 	CreateVBOQuads(m_QuadsCnt, false, 0, 0, 0);
 
 	CreateGridMesh();
@@ -434,21 +434,21 @@ void Renderer::Lecture3_4()
 
 	GLuint aPos = glGetAttribLocation(shader, "a_Position");
 	GLuint aVel = glGetAttribLocation(shader, "a_Vel");
-	GLuint aStartLifePerAmp = glGetAttribLocation(shader, "a_StartLifePerAmp");
+	GLuint aStartLifeRatioAmp = glGetAttribLocation(shader, "a_StartLifeRatioAmp");
 
 	glEnableVertexAttribArray(aPos); // Test: 이 함수에 들어갈 것은? 
 	glEnableVertexAttribArray(aVel);
-	glEnableVertexAttribArray(aStartLifePerAmp);
+	glEnableVertexAttribArray(aStartLifeRatioAmp);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
 	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 10, 0);
 	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 10, (GLvoid*)(sizeof(float) * 3));
-	glVertexAttribPointer(aStartLifePerAmp, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 10, (GLvoid*)(sizeof(float) * 6));
+	glVertexAttribPointer(aStartLifeRatioAmp, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 10, (GLvoid*)(sizeof(float) * 6));
 
 	glDrawArrays(GL_TRIANGLES, 0, 6 * m_QuadsCnt); // GL_LINE_STRIP
 
 	glDisableVertexAttribArray(aPos);
 	glDisableVertexAttribArray(aVel);
-	glDisableVertexAttribArray(aStartLifePerAmp);
+	glDisableVertexAttribArray(aStartLifeRatioAmp);
 }
 
 void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float z)
@@ -477,13 +477,13 @@ void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float
 		float randVely = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);
 		float randVelz = 0.f;
 
-		float startTimeMax = 6.f;
+		float startTimeMax = 10.f;
 		float lifeTimeMax = 3.f;
 		float startTime = startTimeMax * ((float)rand() / (float)RAND_MAX);
-		float lifeTime = lifeTimeMax * ((float)rand() / (float)RAND_MAX);
+		float lifeTime = 3 + lifeTimeMax * ((float)rand() / (float)RAND_MAX);
 
-		float randPeriod = 10 * ((float)rand() / (float)RAND_MAX);
-		float randAmplitude = 10 * ((float)rand() / (float)RAND_MAX);
+		float randRatio = 4 * ((float)rand() / (float)RAND_MAX);
+		float randAmplitude = 0.2 * ((float)rand() / (float)RAND_MAX);
 
 		// triangle 1
 		quads.emplace_back(randx);
@@ -494,7 +494,7 @@ void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float
 		quads.emplace_back(randVelz);
 		quads.emplace_back(startTime);
 		quads.emplace_back(lifeTime);
-		quads.emplace_back(randPeriod);
+		quads.emplace_back(randRatio);
 		quads.emplace_back(randAmplitude);
 
 		quads.emplace_back(randx + quad_size);
@@ -505,7 +505,7 @@ void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float
 		quads.emplace_back(randVelz);
 		quads.emplace_back(startTime);
 		quads.emplace_back(lifeTime);
-		quads.emplace_back(randPeriod);
+		quads.emplace_back(randRatio);
 		quads.emplace_back(randAmplitude);
 
 		quads.emplace_back(randx);
@@ -516,7 +516,7 @@ void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float
 		quads.emplace_back(randVelz);
 		quads.emplace_back(startTime);
 		quads.emplace_back(lifeTime);
-		quads.emplace_back(randPeriod);
+		quads.emplace_back(randRatio);
 		quads.emplace_back(randAmplitude);
 
 		// triangle 2
@@ -528,7 +528,7 @@ void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float
 		quads.emplace_back(randVelz);
 		quads.emplace_back(startTime);
 		quads.emplace_back(lifeTime);
-		quads.emplace_back(randPeriod);
+		quads.emplace_back(randRatio);
 		quads.emplace_back(randAmplitude);
 
 		quads.emplace_back(randx);
@@ -539,7 +539,7 @@ void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float
 		quads.emplace_back(randVelz);
 		quads.emplace_back(startTime);
 		quads.emplace_back(lifeTime);
-		quads.emplace_back(randPeriod);
+		quads.emplace_back(randRatio);
 		quads.emplace_back(randAmplitude);
 
 		quads.emplace_back(randx + quad_size);
@@ -550,7 +550,7 @@ void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float
 		quads.emplace_back(randVelz);
 		quads.emplace_back(startTime);
 		quads.emplace_back(lifeTime);
-		quads.emplace_back(randPeriod);
+		quads.emplace_back(randRatio);
 		quads.emplace_back(randAmplitude);
 	}
 

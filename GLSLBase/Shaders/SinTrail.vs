@@ -1,43 +1,31 @@
 #version 450
 
 in vec3 a_Position;
-in vec4 a_StartLifePerAmp; // Period Amplitude
+in vec3 a_Vel;
+in vec4 a_StartLifeRatioAmp; // Ratio Amplitude
 
 uniform float u_Time;
 
 const float PI = 3.141592;
 
-uniform bool u_Repeat = true;
-const vec3 c_Gravity = vec3(0, -5, 0);
-in vec3 a_Vel;
-
 void main()
 {
 	vec3 newPos = a_Position.xyz;
 
-	float startTime = a_StartLifePerAmp.x;
-	float lifeTime = a_StartLifePerAmp.y;
-	float period = a_StartLifePerAmp.z;
-	float amplitude = a_StartLifePerAmp.w;
+	float startTime = a_StartLifeRatioAmp.x;
+	float lifeTime = a_StartLifeRatioAmp.y;
+	float ratio = a_StartLifeRatioAmp.z;
+	float amp = a_StartLifeRatioAmp.w;
 
 	float newTime = u_Time - startTime;
-	//float newTime = fract(u_Time);
 
-	newPos.x += newTime;
-	newPos.y += sin(newTime * PI * period) * amplitude;
-
-	float life = newTime;
-	float remainingLife = lifeTime - life;
-
-	if(u_Repeat == true)
+	if(newTime > 0)
 	{
-		remainingLife = 1.f;
 		newTime = mod(newTime, lifeTime);
-	}
 
-	if(newTime > 0 && remainingLife > 0)
-	{
-		newPos += (a_Vel * newTime) + (0.5 * c_Gravity * newTime * newTime);
+		amp = amp * newTime * newTime;
+		newPos.x += newTime;
+		newPos.y += sin(newTime * 2 * PI * ratio) * amp; // sin 救率捞 林扁, 官冰率捞 气
 	}
 	else
 	{
