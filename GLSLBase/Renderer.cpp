@@ -449,7 +449,7 @@ void Renderer::Lecture3_4()
 	glVertexAttribPointer(aStartLifeRatioAmp, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (GLvoid*)(sizeof(float) * 6));
 	glVertexAttribPointer(aTheta, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (GLvoid*)(sizeof(float) * 10));
 
-	glDrawArrays(GL_TRIANGLES, 0, 6 * m_QuadsCnt); // GL_LINE_STRIP
+	glDrawArrays(GL_TRIANGLES, 0, 6 * m_QuadsCnt); // GL_LINE_STRIP GL_TRIANGLES
 
 	glDisableVertexAttribArray(aPos);
 	glDisableVertexAttribArray(aVel);
@@ -461,6 +461,9 @@ void Renderer::Lecture4()
 {
 	GLuint shader = m_SinTrailShader;
 	glUseProgram(shader);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	GLuint uTime = glGetUniformLocation(shader, "u_Time");
 
@@ -486,7 +489,7 @@ void Renderer::Lecture4()
 	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 3));
 	glVertexAttribPointer(aStartLifeRatioAmp, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 6));
 	glVertexAttribPointer(aTheta, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 10));
-	glVertexAttribPointer(aColor, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 11));
+	glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 11));
 
 	glDrawArrays(GL_TRIANGLES, 0, 6 * m_QuadsCnt); // GL_LINE_STRIP
 
@@ -499,7 +502,7 @@ void Renderer::Lecture4()
 
 void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float z)
 {
-	float quad_size = 0.01f;
+	float quad_size = 0.2f;
 	int countQuad = count;
 	int verticesPerQuad = 11;
 	int floatsPerVertex = 3 + 3 + 2 + 2 + 1 + 4; // x, y, z, vx, vy, vz, start, life, rat, amp, theta, r, g, b, a
@@ -523,15 +526,16 @@ void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float
 		float randVely = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);
 		float randVelz = 0.f;
 
-		float startTimeMax = 10.f;
-		float lifeTimeMax = 3.f;
-		float startTime = startTimeMax * ((float)rand() / (float)RAND_MAX);
-		float lifeTime = 3 + lifeTimeMax * ((float)rand() / (float)RAND_MAX);
+		float STMax = 5;
+		float LTMax = 1;
+		float LTMin = 0.5f;
+		float startTime = STMax * ((float)rand() / (float)RAND_MAX);
+		float lifeTime = LTMin + LTMax * ((float)rand() / (float)RAND_MAX);
 
-		float randRatio = 4 * ((float)rand() / (float)RAND_MAX);
-		float randAmplitude = 0.2 * ((float)rand() / (float)RAND_MAX);
+		float randRatio = 2 + 4 * ((float)rand() / (float)RAND_MAX);
+		float randAmplitude = -0.1 + 0.2 * ((float)rand() / (float)RAND_MAX);
 
-		float randTheta = 2 * 3.14 * ((float)rand() / (float)RAND_MAX);
+		float randTheta = 1 * ((float)rand() / (float)RAND_MAX);
 
 		float r = ((float)rand() / (float)RAND_MAX);
 		float g = ((float)rand() / (float)RAND_MAX);
