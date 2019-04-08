@@ -1,9 +1,14 @@
 #version 450
 
-in vec3 a_Position;
+// Attributes
+in vec3 a_Position; // in이 아니라 attribute라고 써도 잘 동작
 in vec3 a_Vel;
 in vec4 a_StartLifeRatioAmp; // Ratio Amplitude
 in float a_Theta;
+in vec4 a_Color;
+
+// Varying --> fragment shader input
+out vec4 v_Color;
 
 uniform float u_Time;
 
@@ -45,4 +50,6 @@ void main()
 	}
 
 	gl_Position = vec4(newPos, 1);
+
+	v_Color = vec4(1,0,0,1);
 }

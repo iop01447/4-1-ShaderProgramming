@@ -26,6 +26,7 @@ public:
 	void Lecture3_2();
 	void Lecture3_3();
 	void Lecture3_4();
+	void Lecture4();
 
 	void CreateVBOQuads(int count, bool is_random, float x = 0, float y = 0, float z = 0);
 	//void AddPoints(std::vector<float>& v);
