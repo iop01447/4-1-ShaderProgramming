@@ -39,7 +39,7 @@ void Renderer::CreateVertexBufferObjects()
 	float rect[]
 		=
 	{
-		-size, -size, 0.f, 0.5f, // x, y, z, something
+		-size, -size, 0.f, 0.5f, // x, y, z, value
 		-size, size, 0.f, 0.5f,
 		size, size, 0.f, 0.5f, //Triangle1
 		-size, -size, 0.f, 0.5f,
@@ -77,7 +77,7 @@ void Renderer::CreateVertexBufferObjects()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOLecture2);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertex), triangleVertex, GL_STATIC_DRAW); // memory copy가 일어나서 생각보다 느림. 따라서 GPU에 올리는 타이밍을 잘 설정해야 한다.
 
-	m_QuadsCnt = 1000; //1000
+	m_QuadsCnt = 1; //1000
 	CreateVBOQuads(m_QuadsCnt, false, 0, 0, 0);
 
 	CreateGridMesh();
@@ -459,115 +459,150 @@ void Renderer::Lecture3_4()
 
 void Renderer::Lecture4()
 {
-	GLuint shader = m_SinTrailShader;
-	glUseProgram(shader);
-
+	// 알파 블렌딩을 켜는 API
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	GLuint uTime = glGetUniformLocation(shader, "u_Time");
+	GLuint shader = m_SinTrailShader;
+	glUseProgram(shader);
 
 	static float time = 0;
-	time += 0.01;
+	GLuint uTime = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTime, time);
 
+	time += 0.005f;
+
 	GLuint aPos = glGetAttribLocation(shader, "a_Position");
-	GLuint aVel = glGetAttribLocation(shader, "a_Vel");
-	GLuint aStartLifeRatioAmp = glGetAttribLocation(shader, "a_StartLifeRatioAmp");
-	GLuint aTheta = glGetAttribLocation(shader, "a_Theta");
+	GLuint aVel = glGetAttribLocation(shader, "a_Velocity");
+	GLuint aTime = glGetAttribLocation(shader, "a_Time");
+	GLuint aValue = glGetAttribLocation(shader, "a_Value");
 	GLuint aColor = glGetAttribLocation(shader, "a_Color");
 
-
-	glEnableVertexAttribArray(aPos); // Test: 이 함수에 들어갈 것은? 
+	glEnableVertexAttribArray(aPos);
 	glEnableVertexAttribArray(aVel);
-	glEnableVertexAttribArray(aStartLifeRatioAmp);
-	glEnableVertexAttribArray(aTheta);
+	glEnableVertexAttribArray(aTime);
+	glEnableVertexAttribArray(aValue);
 	glEnableVertexAttribArray(aColor);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
+
+	// (0x, 1y, 2z, 3vx, 4vy, 5vz, 6st, 7lt, 8x, 9y ... )
 	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 15, 0);
 	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 3));
-	glVertexAttribPointer(aStartLifeRatioAmp, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 6));
-	glVertexAttribPointer(aTheta, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 10));
+	glVertexAttribPointer(aTime, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 6));
+	glVertexAttribPointer(aValue, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 10));
 	glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 11));
+
+	glDrawArrays(GL_TRIANGLES, 0, m_VBOQuads_vertexCount);
+
+	glDisableVertexAttribArray(aPos);
+	glDisableVertexAttribArray(aVel);
+	glDisableVertexAttribArray(aTime);
+	glDisableVertexAttribArray(aValue);
+	glDisableVertexAttribArray(aColor);
+}
+
+void Renderer::Lecture4_2()
+{
+	GLuint shader = m_SolidRectShader;
+	glUseProgram(shader);
+
+	GLuint aPos = glGetAttribLocation(shader, "a_Position");
+	GLuint aUV = glGetAttribLocation(shader, "a_UV");
+	/*GLuint aStartLifeRatioAmp = glGetAttribLocation(shader, "a_StartLifeRatioAmp");
+	GLuint aTheta = glGetAttribLocation(shader, "a_Theta");
+	GLuint aColor = glGetAttribLocation(shader, "a_Color");*/
+
+	glEnableVertexAttribArray(aPos); // Test: 이 함수에 들어갈 것은? 
+	glEnableVertexAttribArray(aUV);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 17, 0);
+	glVertexAttribPointer(aUV, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 17, (GLvoid*)(sizeof(float) * 15));
 
 	glDrawArrays(GL_TRIANGLES, 0, 6 * m_QuadsCnt); // GL_LINE_STRIP
 
 	glDisableVertexAttribArray(aPos);
-	glDisableVertexAttribArray(aVel);
-	glDisableVertexAttribArray(aStartLifeRatioAmp);
-	glDisableVertexAttribArray(aTheta);
-	glDisableVertexAttribArray(aColor);
+	glDisableVertexAttribArray(aUV);
 }
 
 void Renderer::CreateVBOQuads(int count, bool is_random, float x, float y, float z)
 {
-	float quad_size = 0.2f;
+	float quad_size = 0.5f;// 0.05f;//1.f; //0.2f;
 	int countQuad = count;
-	int verticesPerQuad = 11;
+	int verticesPerQuad = 6;
 	int floatsPerVertex = 3 + 3 + 2 + 2 + 1 + 4; // x, y, z, vx, vy, vz, start, life, rat, amp, theta, r, g, b, a
 	std::vector<float> quads;
 	quads.reserve(countQuad * verticesPerQuad * floatsPerVertex); // 버텍스 개수 * 버텍스 구성 요소 * 사각형 개수 
 
 	for (int i = 0; i < count; ++i)
 	{
-		float randx = 0;
-		float randy = 0;
-		if (is_random) {
-			randx = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);
-			randy = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);
-		}
-		else {
-			randx = x;
-			randy = y;
-		}
-		// 6개의 버텍스에 동일한 속도 주기
-		float randVelx = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);
-		float randVely = 2.f* (((float)rand() / (float)RAND_MAX) - 0.5f);
-		float randVelz = 0.f;
+		float randX, randY;
+		float randVX, randVY, randVZ;
+		float randST, randLT; // emit(start) time, life time
+		float STMax = 5.f, LTMax = 3.f, LTMin = 1.f;
+		float ratio, amp;
+		float ratioMin = 2.f;
+		float ratioThres = 4.f;
+		float ampMin = -0.1f;
+		float ampThres = 0.2;
+		float randVal = 0.f;
+		float randThres = 1.f;
+		float randR, randG, randB, alpha;
 
-		float STMax = 5;
-		float LTMax = 1;
-		float LTMin = 0.5f;
-		float startTime = STMax * ((float)rand() / (float)RAND_MAX);
-		float lifeTime = LTMin + LTMax * ((float)rand() / (float)RAND_MAX);
+		randX = 2.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+		randY = 2.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
 
-		float randRatio = 2 + 4 * ((float)rand() / (float)RAND_MAX);
-		float randAmplitude = -0.1 + 0.2 * ((float)rand() / (float)RAND_MAX);
+		randVX = 2.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+		randVY = 2.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+		randVZ = 2.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
 
-		float randTheta = 1 * ((float)rand() / (float)RAND_MAX);
+		randST = ((float)rand() / (float)RAND_MAX) * STMax;
+		randLT = ((float)rand() / (float)RAND_MAX) * LTMax + LTMin;
 
-		float r = ((float)rand() / (float)RAND_MAX);
-		float g = ((float)rand() / (float)RAND_MAX);
-		float b = ((float)rand() / (float)RAND_MAX);
-		float a = 1.f;
+		randX = 0.f;  // Lecture 6을 위해
+		randY = 0.f;  // Lecture 6을 위해
 
-		int arr[12]{ 0,0,1,0,0,1,1,0,0,1,1,1 };
+		ratio = ratioMin + ((float)rand() / (float)RAND_MAX * ratioThres);
+		amp = ampMin + ((float)rand() / (float)RAND_MAX * ampThres);
+
+		randVal = randVal + ((float)rand() / (float)(RAND_MAX)* randThres);
+
+		randR = 2.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+		randG = 2.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+		randB = 2.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+		alpha = 1.f;
+
+		int arr[12]{ -1,-1,-1,1,1,1,-1,-1,1,-1,1,1 };
 		int index = 0;
 
 		// triangle 1, 2
 		for (int j = 0; j < 6; ++j) {
-			quads.emplace_back(randx + quad_size * arr[index++]);
-			quads.emplace_back(randy + quad_size * arr[index++]);
+			quads.emplace_back(randX + quad_size * arr[index++]);
+			quads.emplace_back(randY + quad_size * arr[index++]);
 			quads.emplace_back(0);
-			quads.emplace_back(randVelx);
-			quads.emplace_back(randVely);
-			quads.emplace_back(randVelz);
-			quads.emplace_back(startTime);
-			quads.emplace_back(lifeTime);
-			quads.emplace_back(randRatio);
-			quads.emplace_back(randAmplitude);
-			quads.emplace_back(randTheta);
-			quads.emplace_back(r);
-			quads.emplace_back(g);
-			quads.emplace_back(b);
-			quads.emplace_back(a);
+			quads.emplace_back(randVX);
+			quads.emplace_back(randVY);
+			quads.emplace_back(randVZ);
+			quads.emplace_back(randST);
+			quads.emplace_back(randLT);
+			quads.emplace_back(ratio);
+			quads.emplace_back(amp);
+			quads.emplace_back(randVal);
+			quads.emplace_back(randR);
+			quads.emplace_back(randG);
+			quads.emplace_back(randB);
+			quads.emplace_back(alpha);
+			quads.emplace_back(randX);
+			quads.emplace_back(randY);
 		}
 	}
 
 	glGenBuffers(1, &m_VBOQuads);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
 	glBufferData(GL_ARRAY_BUFFER, quads.size() * sizeof(float), quads.data(), GL_STATIC_DRAW);
+
+	m_VBOQuads_vertexCount = count * verticesPerQuad;
 }
 
 void Renderer::DrawQuads()

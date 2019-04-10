@@ -17,6 +17,7 @@ void main()
 	}
 	else
 	{
+	//	newColor = v_Color;
 		newColor = vec4(0,0,0,0);
 	}
 	FragColor = newColor;//vec4(0.2,0.2,0.8,1);
