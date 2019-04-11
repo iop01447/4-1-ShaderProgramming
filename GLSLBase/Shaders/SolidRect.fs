@@ -10,8 +10,6 @@ const vec2 c_Points[2] = {vec2(0, 0), vec2(0.1, 0.1)}; // 이거 주변에서만 동그랗
 
 void main()
 {
-	vec2 newUV = v_Temp.xy - vec2(0.5, 0.5);
-
 	/*float distance = sqrt(v_Temp.x * v_Temp.x + v_Temp.y * v_Temp.y);
 	float grey = sin(distance*3.141592*4*100);
 
@@ -54,5 +52,5 @@ void main()
 			pointGrey += 0.5 * pow((1-(distance/0.1)), 5);
 		}
 	}
-	FragColor = vec4(pointGrey, 0, 1);
+	FragColor = vec4(pointGrey, pointGrey, pointGrey, 1);
 }

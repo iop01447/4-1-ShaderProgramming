@@ -20,6 +20,10 @@ public:
 	GLuint CreatePngTexture(char * filePath);
 	GLuint CreateBmpTexture(char * filePath);
 	   
+	void GenQuadsVBO(int count, bool is_random, float size, float x = 0, float y = 0, float z = 0);
+	void CreateGridMesh();
+	void DrawQuads();
+
 	void Test();
 	void Lecture2();
 	void Lecture3();
@@ -28,13 +32,6 @@ public:
 	void Lecture3_4();
 	void Lecture4();
 	void Lecture4_2();
-
-	void CreateVBOQuads(int count, bool is_random, float x = 0, float y = 0, float z = 0);
-	//void AddPoints(std::vector<float>& v);
-	void DrawQuads();
-
-	void CreateGridMesh();
-
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
