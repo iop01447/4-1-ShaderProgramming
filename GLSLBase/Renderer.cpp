@@ -35,16 +35,16 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 void Renderer::CreateVertexBufferObjects()
 {
-	float size = 0.02f;
+	float size = 0.5f;
 	float rect[]
 		=
 	{
-		-size, -size, 0.f, 0.5f, // x, y, z, value
-		-size, size, 0.f, 0.5f,
-		size, size, 0.f, 0.5f, //Triangle1
-		-size, -size, 0.f, 0.5f,
-		size, size, 0.f, 0.5f,
-		size, -size, 0.f, 0.5f //Triangle2
+		-size, -size, 0.f, 0.5f, 0.f, 0.f,//x, y, z, value, u, v
+		-size, size, 0.f, 0.5f, 0.f, 1.f,
+		size, size, 0.f, 0.5f, 1.f, 1.f, //Triangle1
+		-size, -size, 0.f, 0.5f, 0.f, 0.f,
+		size, size, 0.f, 0.5f, 1.f, 1.f,
+		size, -size, 0.f, 0.5f, 1.f, 0.f //Triangle2
 	};
 
 	glGenBuffers(1, &m_VBORect);
@@ -77,7 +77,7 @@ void Renderer::CreateVertexBufferObjects()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOLecture2);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertex), triangleVertex, GL_STATIC_DRAW); // memory copy가 일어나서 생각보다 느림. 따라서 GPU에 올리는 타이밍을 잘 설정해야 한다.
 
-	GenQuadsVBO(100, false, 0.1f, 0, 0, 0);
+	GenQuadsVBO(1000, false, 0.2f, 0, 0, 0);
 	CreateGridMesh();
 }
 
@@ -374,8 +374,8 @@ void Renderer::GenQuadsVBO(int count, bool is_random, float size, float x, float
 			quads.emplace_back(randG);
 			quads.emplace_back(randB);
 			quads.emplace_back(alpha);
-			//quads.emplace_back(randX);
-			//quads.emplace_back(randY);
+			quads.emplace_back(randX);
+			quads.emplace_back(randY);
 		}
 	}
 
@@ -658,23 +658,24 @@ void Renderer::Lecture4()
 
 void Renderer::Lecture4_2()
 {
+	// TODO: 여기에 구현 코드 추가.
 	GLuint shader = m_SolidRectShader;
+
 	glUseProgram(shader);
 
 	GLuint aPos = glGetAttribLocation(shader, "a_Position");
 	GLuint aUV = glGetAttribLocation(shader, "a_UV");
-	/*GLuint aStartLifeRatioAmp = glGetAttribLocation(shader, "a_StartLifeRatioAmp");
-	GLuint aTheta = glGetAttribLocation(shader, "a_Theta");
-	GLuint aColor = glGetAttribLocation(shader, "a_Color");*/
 
-	glEnableVertexAttribArray(aPos); // Test: 이 함수에 들어갈 것은? 
+	glEnableVertexAttribArray(aPos);
 	glEnableVertexAttribArray(aUV);
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
-	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 17, 0);
-	glVertexAttribPointer(aUV, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 17, (GLvoid*)(sizeof(float) * 15));
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
 
-	glDrawArrays(GL_TRIANGLES, 0, 6 * m_QuadsCnt); // GL_LINE_STRIP
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+	glVertexAttribPointer(aUV, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 6,
+		(GLvoid*)(sizeof(float) * 4));
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glDisableVertexAttribArray(aPos);
 	glDisableVertexAttribArray(aUV);
