@@ -24,6 +24,9 @@ public:
 	void CreateGridMesh();
 	void DrawQuads();
 
+	void FillAll(float alpha);
+
+
 	void Test();
 	void Lecture2();
 	void Lecture3();
@@ -51,6 +54,7 @@ private:
 	GLuint m_SolidRectShader = 0;
 	GLuint m_SimpleVelShader = 0;
 	GLuint m_SinTrailShader = 0;
+	GLuint m_FillAllShader = 0;
 
 	GLuint m_VBOLecture2 = 0;
 	
@@ -61,5 +65,10 @@ private:
 	int m_VBOGridMesh_Count = 0;
 
 	int m_VBOQuads_vertexCount = 0;
+
+	// Textures
+	GLuint m_ParticleTexture = 0;
+	GLuint m_ParticleTexture1 = 0;
+	GLuint m_ParticleTexture2 = 0;
 };
 

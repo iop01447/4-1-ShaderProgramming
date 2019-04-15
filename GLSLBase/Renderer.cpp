@@ -28,6 +28,13 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs"); // 셰이더 프로그램 아이디
 	m_SimpleVelShader = CompileShaders("./Shaders/SimpleVel.vs", "./Shaders/SimpleVel.fs");
 	m_SinTrailShader = CompileShaders("./Shaders/SinTrail.vs", "./Shaders/SinTrail.fs");
+	m_FillAllShader = CompileShaders("./Shaders/FillAll.vs", "./Shaders/FillAll.fs");
+
+	//Load Textures
+	m_ParticleTexture = CreatePngTexture("./Textures/particle.png");
+	m_ParticleTexture1 = CreatePngTexture("./Textures/particle1.png");
+	m_ParticleTexture2 = CreatePngTexture("./Textures/particle2.png");
+
 
 	//Create VBOs
 	CreateVertexBufferObjects();
@@ -35,7 +42,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 void Renderer::CreateVertexBufferObjects()
 {
-	float size = 0.5f;
+	float size = 1.f;//0.5f;
 	float rect[]
 		=
 	{
@@ -77,7 +84,7 @@ void Renderer::CreateVertexBufferObjects()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOLecture2);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertex), triangleVertex, GL_STATIC_DRAW); // memory copy가 일어나서 생각보다 느림. 따라서 GPU에 올리는 타이밍을 잘 설정해야 한다.
 
-	GenQuadsVBO(1000, false, 0.2f, 0, 0, 0);
+	GenQuadsVBO(10000, false, 0.02f, 0, 0, 0);
 	CreateGridMesh();
 }
 
@@ -598,10 +605,10 @@ void Renderer::Lecture3_4()
 	glEnableVertexAttribArray(aTheta);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
-	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 11, 0);
-	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (GLvoid*)(sizeof(float) * 3));
-	glVertexAttribPointer(aStartLifeRatioAmp, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (GLvoid*)(sizeof(float) * 6));
-	glVertexAttribPointer(aTheta, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (GLvoid*)(sizeof(float) * 10));
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 17, 0);
+	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 17, (GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(aStartLifeRatioAmp, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 17, (GLvoid*)(sizeof(float) * 6));
+	glVertexAttribPointer(aTheta, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 17, (GLvoid*)(sizeof(float) * 10));
 
 	glDrawArrays(GL_TRIANGLES, 0, 6 * m_QuadsCnt); // GL_LINE_STRIP GL_TRIANGLES
 
@@ -624,7 +631,12 @@ void Renderer::Lecture4()
 	GLuint uTime = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTime, time);
 
-	time += 0.005f;
+	time += 0.001f;
+
+	int uTex = glGetUniformLocation(shader, "uTexSampler");
+	glUniform1i(uTex, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_ParticleTexture);
 
 	GLuint aPos = glGetAttribLocation(shader, "a_Position");
 	GLuint aVel = glGetAttribLocation(shader, "a_Velocity");
@@ -641,11 +653,11 @@ void Renderer::Lecture4()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
 
 	// (0x, 1y, 2z, 3vx, 4vy, 5vz, 6st, 7lt, 8x, 9y ... )
-	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 15, 0);
-	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 3));
-	glVertexAttribPointer(aTime, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 6));
-	glVertexAttribPointer(aValue, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 10));
-	glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 11));
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 17, 0);
+	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 17, (GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(aTime, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 17, (GLvoid*)(sizeof(float) * 6));
+	glVertexAttribPointer(aValue, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 17, (GLvoid*)(sizeof(float) * 10));
+	glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 17, (GLvoid*)(sizeof(float) * 11));
 
 	glDrawArrays(GL_TRIANGLES, 0, m_VBOQuads_vertexCount);
 
@@ -658,10 +670,26 @@ void Renderer::Lecture4()
 
 void Renderer::Lecture4_2()
 {
+	// 알파 블렌딩을 켜는 API
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 	// TODO: 여기에 구현 코드 추가.
 	GLuint shader = m_SolidRectShader;
-
 	glUseProgram(shader);
+
+	float points[10] = { 0,0.1, -0.2,-0.2, 0.3,0.1, -0.4,-0.4, 0.0,0.2 };
+
+	GLuint uPoints = glGetUniformLocation(shader, "u_Points");
+	glUniform2fv(uPoints, 5, points);
+
+	static float time = 0;
+	GLuint uTime = glGetUniformLocation(shader, "u_Time");
+	glUniform1f(uTime, time);
+
+	time += 0.008f;
+	/*if (time > 1)
+		time = 0;*/
 
 	GLuint aPos = glGetAttribLocation(shader, "a_Position");
 	GLuint aUV = glGetAttribLocation(shader, "a_UV");
@@ -679,4 +707,27 @@ void Renderer::Lecture4_2()
 
 	glDisableVertexAttribArray(aPos);
 	glDisableVertexAttribArray(aUV);
+}
+
+void Renderer::FillAll(float alpha)
+{
+	// 알파 블렌딩을 켜는 API
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// TODO: 여기에 구현 코드 추가.
+	GLuint shader = m_FillAllShader;
+	glUseProgram(shader);
+
+	GLuint aPos = glGetAttribLocation(shader, "a_Position");
+
+	glEnableVertexAttribArray(aPos);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
+
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(aPos);
 }

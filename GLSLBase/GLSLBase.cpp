@@ -22,8 +22,9 @@ int g_WindowSizeY = 500;
 
 void RenderScene(void)
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	g_Renderer->FillAll(0.2);
 
 	// Renderer Test
 	//g_Renderer->Test();
@@ -31,8 +32,8 @@ void RenderScene(void)
 	//g_Renderer->DrawQuads();
 	//g_Renderer->Lecture3();
 	//g_Renderer->Lecture3_4();
-	//g_Renderer->Lecture4();
-	g_Renderer->Lecture4_2();
+	g_Renderer->Lecture4();
+	//g_Renderer->Lecture4_2();
 
 	glutSwapBuffers();
 }

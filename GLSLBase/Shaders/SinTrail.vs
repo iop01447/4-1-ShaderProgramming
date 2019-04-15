@@ -37,13 +37,13 @@ void main()
 
 	if(newTime > 0) {
 		
-		newPos.x += sin(2 * a_Value * pi);
-		newPos.y += cos(2 * a_Value * pi);
+		newPos.x += sin(2 * a_Value * pi); //* fract(u_Time);
+		newPos.y += cos(2 * a_Value * pi);// * fract(u_Time);
 	
 		newTime = mod(newTime, lifeTime);
 
 		newVel = newVel + c_Gravity * newTime; // 새로이 결정되는 속도
-		//newPos = newPos + a_Velocity * newTime + 0.5 * c_Gravity * newTime;
+		newPos = newPos + a_Velocity * newTime + 0.5 * c_Gravity * newTime;
 
 		vec3 vSin = a_Velocity * c_RParticle;
 
