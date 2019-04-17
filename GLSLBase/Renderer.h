@@ -35,6 +35,7 @@ public:
 	void Lecture3_4();
 	void Lecture4();
 	void Lecture4_2();
+	void Lecture6(GLuint tex);
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
@@ -50,11 +51,13 @@ private:
 	unsigned int m_WindowSizeY = 0;
 
 	GLuint m_VBORect = 0;
+	GLuint m_VBOTextureRect = 0;
 	GLuint m_VBORectColor = 0;
 	GLuint m_SolidRectShader = 0;
 	GLuint m_SimpleVelShader = 0;
 	GLuint m_SinTrailShader = 0;
 	GLuint m_FillAllShader = 0;
+	GLuint m_TextureRectShader = 0;
 
 	GLuint m_VBOLecture2 = 0;
 	

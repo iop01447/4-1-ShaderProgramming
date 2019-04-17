@@ -29,6 +29,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_SimpleVelShader = CompileShaders("./Shaders/SimpleVel.vs", "./Shaders/SimpleVel.fs");
 	m_SinTrailShader = CompileShaders("./Shaders/SinTrail.vs", "./Shaders/SinTrail.fs");
 	m_FillAllShader = CompileShaders("./Shaders/FillAll.vs", "./Shaders/FillAll.fs");
+	m_TextureRectShader = CompileShaders("./Shaders/TextureRect.vs", "./Shaders/TextureRect.fs");
 
 	//Load Textures
 	m_ParticleTexture = CreatePngTexture("./Textures/particle.png");
@@ -57,6 +58,22 @@ void Renderer::CreateVertexBufferObjects()
 	glGenBuffers(1, &m_VBORect);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
+
+	size = 0.5f;
+	float texRect[]
+		=
+	{
+		-size, size, 0.f, 0.f, 1.f,//x, y, z, u, v
+		-size, -size, 0.f, 0.f, 0.f,
+		size, size, 0.f, 1.f, 1.f, //Triangle1
+		size, size, 0.f, 1.f, 1.f,
+		-size, -size, 0.f, 0.f, 0.f,
+		size, -size, 0.f, 1.f, 0.f //Triangle2
+	};
+
+	glGenBuffers(1, &m_VBOTextureRect);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTextureRect);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(texRect), texRect, GL_STATIC_DRAW);
 
 	float color[]
 		=
@@ -730,4 +747,33 @@ void Renderer::FillAll(float alpha)
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glDisableVertexAttribArray(aPos);
+}
+
+void Renderer::Lecture6(GLuint tex)
+{
+	// TODO: 여기에 구현 코드 추가.
+	GLuint shader = m_TextureRectShader;
+	glUseProgram(shader);
+
+	static float time = 0;
+	GLuint uTime = glGetUniformLocation(shader, "u_Time");
+	glUniform1f(uTime, time);
+	time += 0.01f;
+
+	GLuint aPos = glGetAttribLocation(shader, "a_Position");
+	GLuint aTex = glGetAttribLocation(shader, "a_Tex");
+
+	glEnableVertexAttribArray(aPos);
+	glEnableVertexAttribArray(aTex);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTextureRect);
+
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(aTex, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5,
+		(GLvoid*)(sizeof(float) * 3));
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(aPos);
+	glDisableVertexAttribArray(aTex);
 }
