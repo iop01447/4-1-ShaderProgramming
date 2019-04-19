@@ -12,7 +12,7 @@ void main()
 
 	vec4 newColor = vec4(0);
 
-	float x = (v_Tex.x + u_Time) * 2 * 3.14;
+	float x = v_Tex.x * 2 * 3.14 + u_Time;
 	float sinResult = (sin(x) + 1)/2; // / (v_Tex.x*10); //-1~1 -> 0~1
 	float size = 0.01;
 

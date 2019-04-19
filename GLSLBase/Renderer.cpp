@@ -5,8 +5,6 @@
 #include <cstdlib>
 #include <cassert>
 #include <vector>
-#include <cstdlib>
-#include <time.h>
 
 Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
@@ -25,9 +23,10 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_WindowSizeY = windowSizeY;
 
 	//Load shaders
-	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs"); // 셰이더 프로그램 아이디
+	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
 	m_SimpleVelShader = CompileShaders("./Shaders/SimpleVel.vs", "./Shaders/SimpleVel.fs");
 	m_SinTrailShader = CompileShaders("./Shaders/SinTrail.vs", "./Shaders/SinTrail.fs");
+	m_FSSandboxShader = CompileShaders("./Shaders/FSSandbox.vs", "./Shaders/FSSandbox.fs");
 	m_FillAllShader = CompileShaders("./Shaders/FillAll.vs", "./Shaders/FillAll.fs");
 	m_TextureRectShader = CompileShaders("./Shaders/TextureRect.vs", "./Shaders/TextureRect.fs");
 
@@ -36,14 +35,13 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_ParticleTexture1 = CreatePngTexture("./Textures/particle1.png");
 	m_ParticleTexture2 = CreatePngTexture("./Textures/particle2.png");
 
-
 	//Create VBOs
 	CreateVertexBufferObjects();
 }
 
 void Renderer::CreateVertexBufferObjects()
 {
-	float size = 1.f;//0.5f;
+	float size = 0.5f;
 	float rect[]
 		=
 	{
@@ -78,31 +76,121 @@ void Renderer::CreateVertexBufferObjects()
 	float color[]
 		=
 	{
-		1, 0, 0, 1,// r, g, b, a
+		1, 0, 0, 1, //r, g, b, a
 		1, 0, 0, 1,
 		1, 0, 0, 1,
 		1, 0, 0, 1,
 		1, 0, 0, 1,
-		1, 0, 0, 1
+		1, 0, 0, 1,
 	};
 
 	glGenBuffers(1, &m_VBORectColor);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectColor);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
 
-	// lecture2
+	//lecture2
 	float triangleVertex[]
 		=
 	{
-		-1.0, -0.0, 0.f, 0.0, 1.0, 0.f, 1.0, 0.0, 0.f // 9 floats
+		-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, // 9 floats
 	};
 
-	glGenBuffers(1, &m_VBOLecture2); // 개수는 하나
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOLecture2);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertex), triangleVertex, GL_STATIC_DRAW); // memory copy가 일어나서 생각보다 느림. 따라서 GPU에 올리는 타이밍을 잘 설정해야 한다.
+	glGenBuffers(1, &m_VBOLecture);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOLecture);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertex), triangleVertex, GL_STATIC_DRAW);
 
-	GenQuadsVBO(10000, false, 0.02f, 0, 0, 0);
+	GenQuadsVBO(1000, true, &m_VBOQuads, &m_VBOQuads_VertexCount);
+	GenQuadsVBO(1000, false, &m_VBOQuads1, &m_VBOQuads_VertexCount1);
 	CreateGridMesh();
+}
+
+void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint * id, GLuint * vCount)
+{
+	float size = 0.04f;
+	int countQuad = count;
+	int verticesPerQuad = 6;
+	int floatsPerVertex = 3 + 3 + 2 + 2 + 1 + 4; //x,y,z, vx,vy,vz, s,l, r,a, randValue, r, g, b, a
+	int arraySize = countQuad * verticesPerQuad * floatsPerVertex; // 버텍스 개수 * 버텍스 구성 요소 * 사각형 개수 
+	std::vector<float> vertices;
+	vertices.reserve(arraySize);
+
+
+	for (int i = 0; i < countQuad; i++)
+	{
+		float randX, randY;
+		float randVelX, randVelY, randVelZ;
+		float startTime, lifeTime;
+		float startTimeMax = 6.f;
+		float lifeTimeMax = 3.f;
+		float ratio, amp;
+		float ratioMin = 2.f;
+		float ratioThres = 4.f;
+		float ampMin = -0.1f;
+		float ampThres = 0.2f;
+		float randValue = 0.f, randThres = 1.f;
+		float r, g, b, a;
+
+		//int index = i * verticesPerQuad * floatsPerVertex;
+
+		if (bRandPos)
+		{
+			randX = 2.f*(((float)rand() / (float)RAND_MAX) - 0.5f);
+			randY = 2.f*(((float)rand() / (float)RAND_MAX) - 0.5f);
+		}
+		else
+		{
+			randX = 0.f;
+			randY = 0.f;
+		}
+
+		randVelX = 0.1f*(((float)rand() / (float)RAND_MAX) - 0.5f);
+		randVelY = 0.1f*(((float)rand() / (float)RAND_MAX) - 0.5f);
+		randVelZ = 0.f;
+
+		startTime = ((float)rand() / (float)RAND_MAX) * startTimeMax;
+		lifeTime = ((float)rand() / (float)RAND_MAX) * lifeTimeMax;
+
+		ratio = ratioMin + ((float)rand() / (float)RAND_MAX) * ratioThres;
+		amp = ampMin + ((float)rand() / (float)RAND_MAX) * ampThres;
+
+		randValue = randValue + ((float)rand() / (float)RAND_MAX) * randThres;
+
+		r = ((float)rand() / (float)RAND_MAX);
+		g = ((float)rand() / (float)RAND_MAX);
+		b = ((float)rand() / (float)RAND_MAX);
+		a = 1.f;
+
+		int arr[12]{ -1,-1,		-1,1,	1,1,	-1,-1,	1,1,	1,-1 };
+		int index = 0;
+
+		// triangle 1, 2
+		for (int j = 0; j < 6; ++j) {
+			vertices.emplace_back(randX + size * arr[index++]);
+			vertices.emplace_back(randY + size * arr[index++]);
+			vertices.emplace_back(0.f);
+			vertices.emplace_back(randVelX);
+			vertices.emplace_back(randVelY);
+			vertices.emplace_back(randVelZ);
+			vertices.emplace_back(startTime);
+			vertices.emplace_back(startTime);
+			vertices.emplace_back(lifeTime);
+			vertices.emplace_back(ratio);
+			vertices.emplace_back(amp);
+			vertices.emplace_back(randValue);
+			vertices.emplace_back(r);
+			vertices.emplace_back(g);
+			vertices.emplace_back(b);
+			vertices.emplace_back(a);
+		}
+	}
+
+	GLuint vboID = 0;
+
+	glGenBuffers(1, &vboID);
+	glBindBuffer(GL_ARRAY_BUFFER, vboID);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertices.size(), vertices.data(), GL_STATIC_DRAW);
+	*vCount = countQuad * verticesPerQuad;
+	*id = vboID;
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -280,6 +368,85 @@ unsigned char * Renderer::loadBMPRaw(const char * imagepath, unsigned int& outWi
 
 	return data;
 }
+void Renderer::CreateGridMesh()
+{
+	float basePosX = -0.5f;
+	float basePosY = -0.5f;
+	float targetPosX = 0.5f;
+	float targetPosY = 0.5f;
+
+	int pointCountX = 32;
+	int pointCountY = 32;
+
+	float width = targetPosX - basePosX;
+	float height = targetPosY - basePosY;
+
+	float* point = new float[pointCountX*pointCountY * 2];
+	float* vertices = new float[(pointCountX - 1)*(pointCountY - 1) * 2 * 3 * 3];
+	m_VBOGridMesh_Count = (pointCountX - 1)*(pointCountY - 1) * 2 * 3;
+
+	//Prepare points
+	for (int x = 0; x < pointCountX; x++)
+	{
+		for (int y = 0; y < pointCountY; y++)
+		{
+			point[(y*pointCountX + x) * 2 + 0] = basePosX + width * (x / (float)(pointCountX - 1));
+			point[(y*pointCountX + x) * 2 + 1] = basePosY + height * (y / (float)(pointCountY - 1));
+		}
+	}
+
+	//Make triangles
+	int vertIndex = 0;
+	for (int x = 0; x < pointCountX - 1; x++)
+	{
+		for (int y = 0; y < pointCountY - 1; y++)
+		{
+			//Triangle part 1
+			vertices[vertIndex] = point[(y*pointCountX + x) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[(y*pointCountX + x) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1)*pointCountX + (x + 1)) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1)*pointCountX + (x + 1)) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1)*pointCountX + x) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1)*pointCountX + x) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+
+			//Triangle part 2
+			vertices[vertIndex] = point[(y*pointCountX + x) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[(y*pointCountX + x) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+			vertices[vertIndex] = point[(y*pointCountX + (x + 1)) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[(y*pointCountX + (x + 1)) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1)*pointCountX + (x + 1)) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1)*pointCountX + (x + 1)) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+		}
+	}
+
+	glGenBuffers(1, &m_VBOGridMesh);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOGridMesh);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(pointCountX - 1)*(pointCountY - 1) * 2 * 3 * 3, vertices, GL_STATIC_DRAW);
+}
 
 GLuint Renderer::CreatePngTexture(char * filePath)
 {
@@ -330,178 +497,21 @@ GLuint Renderer::CreateBmpTexture(char * filePath)
 	return temp;
 }
 
-void Renderer::GenQuadsVBO(int count, bool is_random, float size, float x, float y, float z)
-{
-	m_QuadsCnt = count;
-	float quad_size = size;// 0.05f;//1.f; //0.2f;
-	int countQuad = count;
-	int verticesPerQuad = 6;
-	int floatsPerVertex = 3 + 3 + 2 + 2 + 1 + 4; // x, y, z, vx, vy, vz, start, life, rat, amp, theta, r, g, b, a
-	std::vector<float> quads;
-	quads.reserve(countQuad * verticesPerQuad * floatsPerVertex); // 버텍스 개수 * 버텍스 구성 요소 * 사각형 개수 
-
-	for (int i = 0; i < count; ++i)
-	{
-		float randX, randY;
-		float randVX, randVY, randVZ;
-		float randST, randLT; // emit(start) time, life time
-		float STMax = 5.f, LTMax = 3.f, LTMin = 1.f;
-		float ratio, amp;
-		float ratioMin = 2.f;
-		float ratioThres = 4.f;
-		float ampMin = -0.1f;
-		float ampThres = 0.2;
-		float randVal = 0.f;
-		float randThres = 1.f;
-		float randR, randG, randB, alpha;
-
-		randX = 2.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-		randY = 2.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-
-		randVX = 2.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-		randVY = 2.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-		randVZ = 2.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-
-		randST = ((float)rand() / (float)RAND_MAX) * STMax;
-		randLT = ((float)rand() / (float)RAND_MAX) * LTMax + LTMin;
-
-		randX = 0.f;  // Lecture 6을 위해
-		randY = 0.f;  // Lecture 6을 위해
-
-		ratio = ratioMin + ((float)rand() / (float)RAND_MAX * ratioThres);
-		amp = ampMin + ((float)rand() / (float)RAND_MAX * ampThres);
-
-		randVal = randVal + ((float)rand() / (float)(RAND_MAX)* randThres);
-
-		randR = 2.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-		randG = 2.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-		randB = 2.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-		alpha = 1.f;
-
-		int arr[12]{ -1,-1,		-1,1,	1,1,	-1,-1,	1,-1,	1,1 };
-		int index = 0;
-
-		// triangle 1, 2
-		for (int j = 0; j < 6; ++j) {
-			quads.emplace_back(randX + quad_size * arr[index++]);
-			quads.emplace_back(randY + quad_size * arr[index++]);
-			quads.emplace_back(0);
-			quads.emplace_back(randVX);
-			quads.emplace_back(randVY);
-			quads.emplace_back(randVZ);
-			quads.emplace_back(randST);
-			quads.emplace_back(randLT);
-			quads.emplace_back(ratio);
-			quads.emplace_back(amp);
-			quads.emplace_back(randVal);
-			quads.emplace_back(randR);
-			quads.emplace_back(randG);
-			quads.emplace_back(randB);
-			quads.emplace_back(alpha);
-			quads.emplace_back(randX);
-			quads.emplace_back(randY);
-		}
-	}
-
-	glGenBuffers(1, &m_VBOQuads);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
-	glBufferData(GL_ARRAY_BUFFER, quads.size() * sizeof(float), quads.data(), GL_STATIC_DRAW);
-
-	m_VBOQuads_vertexCount = count * verticesPerQuad;
-}
-
-void Renderer::DrawQuads()
-{
-	glUseProgram(m_SolidRectShader); // 쉐이더 아직 안쓰니까 넘어감
-	glEnableVertexAttribArray(0); // 0이 뭔지 아직 안알아도 됨
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0); // 0이라는 것은 glEnableVertexAttribArray에 0넣어서
-
-	glDrawArrays(GL_TRIANGLES, 0, 6 * m_QuadsCnt);
-
-	glDisableVertexAttribArray(0);
-}
-
-void Renderer::CreateGridMesh()
-{
-	float basePosX = -0.5f;
-	float basePosY = -0.5f;
-	float targetPosX = 0.5f;
-	float targetPosY = 0.5f;
-
-	int pointCountX = 32;
-	int pointCountY = 32;
-
-	float width = targetPosX - basePosX;
-	float height = targetPosY - basePosY;
-
-	float* point = new float[pointCountX*pointCountY * 2];
-	std::vector<float> vertices;
-	vertices.reserve((pointCountX - 1)*(pointCountY - 1) * 2 * 3 * 3);
-	//float* vertices = new float[(pointCountX - 1)*(pointCountY - 1) * 2 * 3 * 3];
-	m_VBOGridMesh_Count = (pointCountX - 1)*(pointCountY - 1) * 2 * 3;
-
-	//Prepare points
-	for (int x = 0; x < pointCountX; x++)
-	{
-		for (int y = 0; y < pointCountY; y++)
-		{
-			point[(y*pointCountX + x) * 2 + 0] = basePosX + width * (x / (float)(pointCountX - 1));
-			point[(y*pointCountX + x) * 2 + 1] = basePosY + height * (y / (float)(pointCountY - 1));
-		}
-	}
-
-	//Make triangles
-	for (int x = 0; x < pointCountX - 1; x++)
-	{
-		for (int y = 0; y < pointCountY - 1; y++)
-		{
-			//Triangle part 1
-			vertices.push_back(point[(y*pointCountX + x) * 2 + 0]);
-			vertices.push_back(point[(y*pointCountX + x) * 2 + 1]);
-			vertices.push_back(0.f);
-
-			vertices.push_back(point[((y + 1)*pointCountX + (x + 1)) * 2 + 0]);
-			vertices.push_back(point[((y + 1)*pointCountX + (x + 1)) * 2 + 1]);
-			vertices.push_back(0.f);
-			vertices.push_back(point[((y + 1)*pointCountX + x) * 2 + 0]);
-			vertices.push_back(point[((y + 1)*pointCountX + x) * 2 + 1]);
-			vertices.push_back(0.f);
-
-			//Triangle part 2
-			vertices.push_back(point[(y*pointCountX + x) * 2 + 0]);
-			vertices.push_back(point[(y*pointCountX + x) * 2 + 1]);
-			vertices.push_back(0.f);
-			vertices.push_back(point[(y*pointCountX + (x + 1)) * 2 + 0]);
-			vertices.push_back(point[(y*pointCountX + (x + 1)) * 2 + 1]);
-			vertices.push_back(0.f);
-			vertices.push_back(point[((y + 1)*pointCountX + (x + 1)) * 2 + 0]);
-			vertices.push_back(point[((y + 1)*pointCountX + (x + 1)) * 2 + 1]);
-			vertices.push_back(0.f);
-		}
-	}
-
-	glGenBuffers(1, &m_VBOGridMesh);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOGridMesh);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(pointCountX - 1)*(pointCountY - 1) * 2 * 3 * 3, vertices.data(), GL_STATIC_DRAW);
-}
+float g_Time = 0.f;
 
 void Renderer::Test()
 {
 	glUseProgram(m_SolidRectShader);
 
+	g_Time += 0.01;
+	if (g_Time > 1.0f)
+		g_Time = 0.f;
+
 	GLuint uTime = glGetUniformLocation(m_SolidRectShader, "u_Time");
-	static float time = 1.f;
-	static float addValue = 0.01;
-	time += addValue;
-	if (time > 1)
-		time = 0;
-
-	glUniform1f(uTime, time); // float 포인트 하나
-
+	glUniform1f(uTime, g_Time);
 
 	GLuint aPos = glGetAttribLocation(m_SolidRectShader, "a_Position");
-	GLuint aCol = glGetAttribLocation(m_SolidRectShader, "a_Color"); // color가 사용되고 있지 않아서 의미없는 값이 리턴됨
+	GLuint aCol = glGetAttribLocation(m_SolidRectShader, "a_Color");
 
 	glEnableVertexAttribArray(aPos);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
@@ -509,204 +519,157 @@ void Renderer::Test()
 
 	glEnableVertexAttribArray(aCol);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectColor);
-	glVertexAttribPointer(aCol, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(aCol, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	glDisableVertexAttribArray(aPos);
-	glDisableVertexAttribArray(aCol);
-
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
 }
 
 void Renderer::Lecture2()
 {
-	glUseProgram(m_SolidRectShader); // 쉐이더 아직 안쓰니까 넘어감
-	glEnableVertexAttribArray(0); // 0이 뭔지 아직 안알아도 됨
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOLecture2);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // 첫번째 인자가 0이라는 것은 glEnableVertexAttribArray에 0넣어서
+	glUseProgram(m_SolidRectShader);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, m_VBOQuads_VertexCount);
 
 	glDisableVertexAttribArray(0);
 }
 
 void Renderer::Lecture3()
 {
-	glUseProgram(m_SolidRectShader); // 쉐이더 아직 안쓰니까 넘어감
-	glEnableVertexAttribArray(0); // 0이 뭔지 아직 안알아도 됨
+	glUseProgram(m_SolidRectShader);
+	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOGridMesh);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0); // 0이라는 것은 glEnableVertexAttribArray에 0넣어서
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 
-	glDrawArrays(GL_TRIANGLES, 0, m_VBOGridMesh_Count); // GL_LINE_STRIP / GL_TRIANGLES
+	glDrawArrays(GL_LINE_STRIP, 0, m_VBOGridMesh_Count);
 
 	glDisableVertexAttribArray(0);
 }
 
-void Renderer::Lecture3_2()
+void Renderer::Lecture4()
 {
 	glUseProgram(m_SimpleVelShader);
 
 	GLuint uTime = glGetUniformLocation(m_SimpleVelShader, "u_Time");
-	static float time = 0;
-	time += 0.01;
-	//if (time > 2)
-		//time = 0;
-	glUniform1f(uTime, time);
+	glUniform1f(uTime, g_Time);
+	g_Time += 0.01;
 
 	GLuint aPos = glGetAttribLocation(m_SimpleVelShader, "a_Position");
 	GLuint aVel = glGetAttribLocation(m_SimpleVelShader, "a_Vel");
 
-	glEnableVertexAttribArray(aPos); // Test: 이 함수에 들어갈 것은? 
+	//(0x, 1y, 2z, 3vx, 4vy, 5vz, 6s, 7l, 8x, 9y, 10z, 11vx, 12vy, 13vz, 14s, 15l, )
+
+	glEnableVertexAttribArray(aPos);
 	glEnableVertexAttribArray(aVel);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
 	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
-	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6,
+		(GLvoid*)(sizeof(float) * 3));
 
-	glDrawArrays(GL_TRIANGLES, 0, 6 * m_QuadsCnt); // GL_LINE_STRIP
+	glDrawArrays(GL_TRIANGLES, 0, m_VBOQuads_VertexCount);
+	//glDrawArrays(GL_LINE_STRIP, 0, m_VBOQuads_VertexCount);
 
 	glDisableVertexAttribArray(aPos);
 	glDisableVertexAttribArray(aVel);
 }
 
-void Renderer::Lecture3_3()
+void Renderer::Lecture5()
 {
 	glUseProgram(m_SimpleVelShader);
 
 	GLuint uTime = glGetUniformLocation(m_SimpleVelShader, "u_Time");
 	GLuint uRepeat = glGetUniformLocation(m_SimpleVelShader, "u_Repeat");
 
-	static float time = 0;
-	time += 0.01;
-	glUniform1f(uTime, time);
-	//glUniform1f(uRepeat, true);
+	glUniform1f(uTime, g_Time);
+	g_Time += 0.01;
 
 	GLuint aPos = glGetAttribLocation(m_SimpleVelShader, "a_Position");
 	GLuint aVel = glGetAttribLocation(m_SimpleVelShader, "a_Vel");
 	GLuint aStartLife = glGetAttribLocation(m_SimpleVelShader, "a_StartLife");
 
-	glEnableVertexAttribArray(aPos); // Test: 이 함수에 들어갈 것은? 
+	glEnableVertexAttribArray(aPos);
 	glEnableVertexAttribArray(aVel);
 	glEnableVertexAttribArray(aStartLife);
+
+	//(0x, 1y, 2z, 3vx, 4vy, 5vz, 6s, 7l,  8x, 9y, 10z, 11vx, 12vy, 13vz, 14s, 15l, )
+
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
 	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
-	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 3));
-	glVertexAttribPointer(aStartLife, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 6));
+	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8,
+		(GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(aStartLife, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8,
+		(GLvoid*)(sizeof(float) * 6));
 
-	glDrawArrays(GL_TRIANGLES, 0, 6 * m_QuadsCnt); // GL_LINE_STRIP
+	glDrawArrays(GL_TRIANGLES, 0, m_VBOQuads_VertexCount);
+	//glDrawArrays(GL_LINE_STRIP, 0, m_VBOQuads_VertexCount);
 
 	glDisableVertexAttribArray(aPos);
 	glDisableVertexAttribArray(aVel);
 	glDisableVertexAttribArray(aStartLife);
 }
 
-void Renderer::Lecture3_4()
+void Renderer::Lecture6()
 {
+	// TODO: 여기에 구현 코드 추가.
 	GLuint shader = m_SinTrailShader;
-	glUseProgram(shader);
 
-	GLuint uTime = glGetUniformLocation(shader, "u_Time");
-
-	static float time = 0;
-	time += 0.01;
-	glUniform1f(uTime, time);
-
-	GLuint aPos = glGetAttribLocation(shader, "a_Position");
-	GLuint aVel = glGetAttribLocation(shader, "a_Vel");
-	GLuint aStartLifeRatioAmp = glGetAttribLocation(shader, "a_StartLifeRatioAmp");
-	GLuint aTheta = glGetAttribLocation(shader, "a_Theta");
-
-
-	glEnableVertexAttribArray(aPos); // Test: 이 함수에 들어갈 것은? 
-	glEnableVertexAttribArray(aVel);
-	glEnableVertexAttribArray(aStartLifeRatioAmp);
-	glEnableVertexAttribArray(aTheta);
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
-	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 17, 0);
-	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 17, (GLvoid*)(sizeof(float) * 3));
-	glVertexAttribPointer(aStartLifeRatioAmp, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 17, (GLvoid*)(sizeof(float) * 6));
-	glVertexAttribPointer(aTheta, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 17, (GLvoid*)(sizeof(float) * 10));
-
-	glDrawArrays(GL_TRIANGLES, 0, 6 * m_QuadsCnt); // GL_LINE_STRIP GL_TRIANGLES
-
-	glDisableVertexAttribArray(aPos);
-	glDisableVertexAttribArray(aVel);
-	glDisableVertexAttribArray(aStartLifeRatioAmp);
-	glDisableVertexAttribArray(aTheta);
-}
-
-void Renderer::Lecture4()
-{
-	// 알파 블렌딩을 켜는 API
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	GLuint shader = m_SinTrailShader;
 	glUseProgram(shader);
 
-	static float time = 0;
 	GLuint uTime = glGetUniformLocation(shader, "u_Time");
-	glUniform1f(uTime, time);
 
-	time += 0.001f;
-
-	int uTex = glGetUniformLocation(shader, "uTexSampler");
-	glUniform1i(uTex, 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_ParticleTexture);
+	glUniform1f(uTime, g_Time);
+	g_Time += 0.01;
 
 	GLuint aPos = glGetAttribLocation(shader, "a_Position");
-	GLuint aVel = glGetAttribLocation(shader, "a_Velocity");
-	GLuint aTime = glGetAttribLocation(shader, "a_Time");
-	GLuint aValue = glGetAttribLocation(shader, "a_Value");
+	GLuint aVel = glGetAttribLocation(shader, "a_Vel");
+	GLuint aSLRA = glGetAttribLocation(shader, "a_StartLifeRatioAmp");
+	GLuint aRandV = glGetAttribLocation(shader, "a_RandV");
 	GLuint aColor = glGetAttribLocation(shader, "a_Color");
 
 	glEnableVertexAttribArray(aPos);
 	glEnableVertexAttribArray(aVel);
-	glEnableVertexAttribArray(aTime);
-	glEnableVertexAttribArray(aValue);
+	glEnableVertexAttribArray(aSLRA);
+	glEnableVertexAttribArray(aRandV);
 	glEnableVertexAttribArray(aColor);
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOQuads1);
 
-	// (0x, 1y, 2z, 3vx, 4vy, 5vz, 6st, 7lt, 8x, 9y ... )
-	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 17, 0);
-	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 17, (GLvoid*)(sizeof(float) * 3));
-	glVertexAttribPointer(aTime, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 17, (GLvoid*)(sizeof(float) * 6));
-	glVertexAttribPointer(aValue, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 17, (GLvoid*)(sizeof(float) * 10));
-	glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 17, (GLvoid*)(sizeof(float) * 11));
+	//(0x, 1y, 2z, 3vx, 4vy, 5vz, 6s, 7l, 8r, 9a, 10v, 11x, 12y, 13z, 14vx
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 15, 0);
+	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 15,
+		(GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(aSLRA, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 15,
+		(GLvoid*)(sizeof(float) * 6));
+	glVertexAttribPointer(aRandV, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 15,
+		(GLvoid*)(sizeof(float) * 10));
+	glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 15,
+		(GLvoid*)(sizeof(float) * 11));
 
-	glDrawArrays(GL_TRIANGLES, 0, m_VBOQuads_vertexCount);
+	glDrawArrays(GL_TRIANGLES, 0, m_VBOQuads_VertexCount1);
 
 	glDisableVertexAttribArray(aPos);
 	glDisableVertexAttribArray(aVel);
-	glDisableVertexAttribArray(aTime);
-	glDisableVertexAttribArray(aValue);
+	glDisableVertexAttribArray(aSLRA);
+	glDisableVertexAttribArray(aRandV);
 	glDisableVertexAttribArray(aColor);
+
+	glDisable(GL_BLEND);
 }
 
-void Renderer::Lecture4_2()
+void Renderer::Lecture7()
 {
-	// 알파 블렌딩을 켜는 API
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
 	// TODO: 여기에 구현 코드 추가.
-	GLuint shader = m_SolidRectShader;
+	GLuint shader = m_FSSandboxShader;
+
 	glUseProgram(shader);
-
-	float points[10] = { 0,0.1, -0.2,-0.2, 0.3,0.1, -0.4,-0.4, 0.0,0.2 };
-
-	GLuint uPoints = glGetUniformLocation(shader, "u_Points");
-	glUniform2fv(uPoints, 5, points);
-
-	static float time = 0;
-	GLuint uTime = glGetUniformLocation(shader, "u_Time");
-	glUniform1f(uTime, time);
-
-	time += 0.008f;
-	/*if (time > 1)
-		time = 0;*/
 
 	GLuint aPos = glGetAttribLocation(shader, "a_Position");
 	GLuint aUV = glGetAttribLocation(shader, "a_UV");
@@ -749,7 +712,48 @@ void Renderer::FillAll(float alpha)
 	glDisableVertexAttribArray(aPos);
 }
 
-void Renderer::Lecture6(GLuint tex)
+void Renderer::Lecture8()
+{
+	// 알파 블렌딩을 켜는 API
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// TODO: 여기에 구현 코드 추가.
+	GLuint shader = m_FSSandboxShader;
+	glUseProgram(shader);
+
+	float points[10] = { 0,0.1, -0.2,-0.2, 0.3,0.1, -0.4,-0.4, 0.0,0.2 };
+
+	GLuint uPoints = glGetUniformLocation(shader, "u_Points");
+	glUniform2fv(uPoints, 5, points);
+
+	static float time = 0;
+	GLuint uTime = glGetUniformLocation(shader, "u_Time");
+	glUniform1f(uTime, time);
+
+	time += 0.008f;
+	/*if (time > 1)
+		time = 0;*/
+
+	GLuint aPos = glGetAttribLocation(shader, "a_Position");
+	GLuint aUV = glGetAttribLocation(shader, "a_UV");
+
+	glEnableVertexAttribArray(aPos);
+	glEnableVertexAttribArray(aUV);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
+
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+	glVertexAttribPointer(aUV, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 6,
+		(GLvoid*)(sizeof(float) * 4));
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(aPos);
+	glDisableVertexAttribArray(aUV);
+}
+
+void Renderer::Lecture9(GLuint tex)
 {
 	// TODO: 여기에 구현 코드 추가.
 	GLuint shader = m_TextureRectShader;
@@ -758,7 +762,7 @@ void Renderer::Lecture6(GLuint tex)
 	static float time = 0;
 	GLuint uTime = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTime, time);
-	time += 0.01f;
+	time += 0.005f;
 
 	GLuint aPos = glGetAttribLocation(shader, "a_Position");
 	GLuint aTex = glGetAttribLocation(shader, "a_Tex");
