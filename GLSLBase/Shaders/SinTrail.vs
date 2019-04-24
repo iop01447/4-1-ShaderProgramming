@@ -21,6 +21,7 @@ const vec3 c_Gravity = vec3(0, -1, 0);
 void main()
 {
 	vec3 newPos = a_Position.xyz;
+	
 	v_OriXY = a_Position.xy;
 	v_Radius = abs(a_Position.x);
 	vec3 newVel = a_Vel.xyz;
@@ -56,7 +57,7 @@ void main()
 		newPos = vec3(100000, 100000, 100000);
 	}
 	
-	gl_Position = vec4(newPos.xyz, 1);
+	gl_Position = vec4(newPos, 1);
 
 	v_Color = a_Color;
 	v_Color.a = newAlpha;

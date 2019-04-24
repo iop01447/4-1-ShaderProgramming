@@ -50,6 +50,7 @@ private:
 	GLuint m_VBOQuads_VertexCount = 0;
 	GLuint m_VBOQuads1 = 0;
 	GLuint m_VBOQuads_VertexCount1 = 0;
+	GLuint m_VBOQuads_FloatsPerVertex = 0;
 
 	GLuint m_VBOGridMesh = 0;
 	int m_VBOGridMesh_Count = 0;
@@ -61,6 +62,7 @@ private:
 	GLuint m_FSSandboxShader = 0;
 	GLuint m_FillAllShader = 0;
 	GLuint m_TextureRectShader = 0;
+	GLuint m_MidTermShader = 0;
 
 public:
 	void Lecture6();
@@ -69,6 +71,7 @@ public:
 	void FillAll(float alpha);
 	void Lecture8();
 	void Lecture9(GLuint tex);
+	void MidTermTest();
 
 private:
 	// Textures
