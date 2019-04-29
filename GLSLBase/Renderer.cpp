@@ -35,6 +35,8 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_ParticleTexture1 = CreatePngTexture("./Textures/particle1.png");
 	m_ParticleTexture2 = CreatePngTexture("./Textures/particle2.png");
 
+	m_LogoTexture = CreatePngTexture("./Textures/logo.png");
+
 	//Create VBOs
 	CreateVertexBufferObjects();
 }
@@ -102,6 +104,30 @@ void Renderer::CreateVertexBufferObjects()
 	GenQuadsVBO(1000, true, &m_VBOQuads, &m_VBOQuads_VertexCount);
 	GenQuadsVBO(1000, false, &m_VBOQuads1, &m_VBOQuads_VertexCount1);
 	CreateGridMesh();
+	CreateTextures();
+}
+
+void Renderer::CreateTextures()
+{
+	static const GLulong checkerboard[] =
+	{
+	0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000,
+	0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF,
+	0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000,
+	0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF,
+	0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000,
+	0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF,
+	0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000,
+	0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF
+	};
+
+	glGenTextures(1, &gTextureID);
+	glBindTexture(GL_TEXTURE_2D, gTextureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 8, 8, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerboard);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 void Renderer::GenQuadsVBO(int count, bool bRandPos, GLuint * id, GLuint * vCount)
@@ -492,7 +518,7 @@ GLuint Renderer::CreateBmpTexture(char * filePath)
 	glBindTexture(GL_TEXTURE_2D, temp);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, bmp);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, bmp);
 
 	return temp;
 }
@@ -764,8 +790,13 @@ void Renderer::Lecture9(GLuint tex)
 	glUniform1f(uTime, time);
 	time += 0.005f;
 
-	GLuint aPos = glGetAttribLocation(shader, "a_Position");
-	GLuint aTex = glGetAttribLocation(shader, "a_Tex");
+	int uniformTex = glGetUniformLocation(shader, "uTexSampler");
+	glUniform1i(uniformTex, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_LogoTexture); // gTextureID);
+
+	GLuint aPos = glGetAttribLocation(shader, "Position");
+	GLuint aTex = glGetAttribLocation(shader, "TexPos");
 
 	glEnableVertexAttribArray(aPos);
 	glEnableVertexAttribArray(aTex);

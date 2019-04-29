@@ -70,12 +70,18 @@ public:
 	void Lecture8();
 	void Lecture9(GLuint tex);
 
+	void CreateTextures();
+
 private:
 	// Textures
 	GLuint m_ParticleTexture = 0;
 	GLuint m_ParticleTexture1 = 0;
 	GLuint m_ParticleTexture2 = 0;
+	GLuint m_LogoTexture = 0;
 
 	GLuint m_VBOTextureRect = 0;
+
+	GLuint gTextureID = 0;
+
 };
 

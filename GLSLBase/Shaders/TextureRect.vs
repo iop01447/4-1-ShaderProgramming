@@ -1,12 +1,16 @@
 #version 450
 
-in vec3 a_Position;
-in vec2 a_Tex;
+in vec3 Position;
+in vec2 TexPos;
 
-out vec2 v_Tex;
+
+out vec2 vTexPos;
 
 void main()
 {
-	gl_Position = vec4(a_Position.xyz, 1);
-	v_Tex = a_Tex;
+	vec3 newPos = Position;
+	vec2 newTex = TexPos;
+//	newTex *= 2;
+    gl_Position = vec4(newPos, 1.0);
+    vTexPos = newTex;
 }
