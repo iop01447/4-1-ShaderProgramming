@@ -35,7 +35,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_ParticleTexture1 = CreatePngTexture("./Textures/particle1.png");
 	m_ParticleTexture2 = CreatePngTexture("./Textures/particle2.png");
 
-	m_LogoTexture = CreatePngTexture("./Textures/logo.png");
+	m_LogoTexture = CreatePngTexture("./Textures/logo2.png");
 
 	//Create VBOs
 	CreateVertexBufferObjects();
@@ -790,10 +790,10 @@ void Renderer::Lecture9(GLuint tex)
 	glUniform1f(uTime, time);
 	time += 0.005f;
 
-	int uniformTex = glGetUniformLocation(shader, "uTexSampler");
+	int uniformTex = glGetUniformLocation(shader, "u_Texture");
 	glUniform1i(uniformTex, 0);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_LogoTexture); // gTextureID);
+	glBindTexture(GL_TEXTURE_2D, m_LogoTexture); // m_LogoTexture gTextureID);
 
 	GLuint aPos = glGetAttribLocation(shader, "Position");
 	GLuint aTex = glGetAttribLocation(shader, "TexPos");
