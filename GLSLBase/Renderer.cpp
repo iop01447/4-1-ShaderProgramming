@@ -35,7 +35,19 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_ParticleTexture1 = CreatePngTexture("./Textures/particle1.png");
 	m_ParticleTexture2 = CreatePngTexture("./Textures/particle2.png");
 
-	m_LogoTexture = CreatePngTexture("./Textures/logo2.png");
+	m_RGBTexture = CreatePngTexture("./Textures/rgb.png");
+	m_LogoTexture = CreatePngTexture("./Textures/logo.png");
+
+	m_NumTextures[0] = CreatePngTexture("./Textures/0.png");
+	m_NumTextures[1] = CreatePngTexture("./Textures/1.png");
+	m_NumTextures[2] = CreatePngTexture("./Textures/2.png");
+	m_NumTextures[3] = CreatePngTexture("./Textures/3.png");
+	m_NumTextures[4] = CreatePngTexture("./Textures/4.png");
+	m_NumTextures[5] = CreatePngTexture("./Textures/5.png");
+	m_NumTextures[6] = CreatePngTexture("./Textures/6.png");
+	m_NumTextures[7] = CreatePngTexture("./Textures/7.png");
+	m_NumTextures[8] = CreatePngTexture("./Textures/8.png");
+	m_NumTextures[9] = CreatePngTexture("./Textures/9.png");
 
 	//Create VBOs
 	CreateVertexBufferObjects();
@@ -121,8 +133,8 @@ void Renderer::CreateTextures()
 	0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF
 	};
 
-	glGenTextures(1, &gTextureID);
-	glBindTexture(GL_TEXTURE_2D, gTextureID);
+	glGenTextures(1, &m_CheckboardTexture);
+	glBindTexture(GL_TEXTURE_2D, m_CheckboardTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 8, 8, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerboard);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -790,10 +802,23 @@ void Renderer::Lecture9(GLuint tex)
 	glUniform1f(uTime, time);
 	time += 0.005f;
 
-	int uniformTex = glGetUniformLocation(shader, "u_Texture");
-	glUniform1i(uniformTex, 0);
+	int uTex = glGetUniformLocation(shader, "u_Textures");
+	glUniform1i(uTex, 0);
+	int uTex1 = glGetUniformLocation(shader, "u_Texture1");
+	glUniform1i(uTex1, 1);
+	int uTex2 = glGetUniformLocation(shader, "u_Texture2");
+	glUniform1i(uTex2, 2);
+	int uTex3 = glGetUniformLocation(shader, "u_Texture3");
+	glUniform1i(uTex3, 3);
+
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_LogoTexture); // m_LogoTexture gTextureID);
+	glBindTexture(GL_TEXTURE_2D, m_NumTextures[0]);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_NumTextures[1]);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, m_NumTextures[2]);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, m_NumTextures[3]);
 
 	GLuint aPos = glGetAttribLocation(shader, "Position");
 	GLuint aTex = glGetAttribLocation(shader, "TexPos");

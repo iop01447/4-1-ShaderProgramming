@@ -74,14 +74,16 @@ public:
 
 private:
 	// Textures
+	GLuint m_CheckboardTexture = 0;
 	GLuint m_ParticleTexture = 0;
 	GLuint m_ParticleTexture1 = 0;
 	GLuint m_ParticleTexture2 = 0;
 	GLuint m_LogoTexture = 0;
+	GLuint m_RGBTexture = 0;
+	GLuint m_NumTextures[10];
 
 	GLuint m_VBOTextureRect = 0;
 
-	GLuint gTextureID = 0;
 
 };
 
