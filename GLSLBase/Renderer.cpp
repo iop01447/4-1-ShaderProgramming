@@ -49,6 +49,8 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_NumTextures[8] = CreatePngTexture("./Textures/8.png");
 	m_NumTextures[9] = CreatePngTexture("./Textures/9.png");
 
+	m_NumTexture = CreatePngTexture("./Textures/number.png");
+
 	//Create VBOs
 	CreateVertexBufferObjects();
 }
@@ -802,23 +804,11 @@ void Renderer::Lecture9(GLuint tex)
 	glUniform1f(uTime, time);
 	time += 0.005f;
 
-	int uTex = glGetUniformLocation(shader, "u_Textures");
+	int uTex = glGetUniformLocation(shader, "u_Texture");
 	glUniform1i(uTex, 0);
-	int uTex1 = glGetUniformLocation(shader, "u_Texture1");
-	glUniform1i(uTex1, 1);
-	int uTex2 = glGetUniformLocation(shader, "u_Texture2");
-	glUniform1i(uTex2, 2);
-	int uTex3 = glGetUniformLocation(shader, "u_Texture3");
-	glUniform1i(uTex3, 3);
-
+	
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_NumTextures[0]);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_NumTextures[1]);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, m_NumTextures[2]);
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, m_NumTextures[3]);
+	glBindTexture(GL_TEXTURE_2D, m_NumTexture);
 
 	GLuint aPos = glGetAttribLocation(shader, "Position");
 	GLuint aTex = glGetAttribLocation(shader, "TexPos");
@@ -834,6 +824,39 @@ void Renderer::Lecture9(GLuint tex)
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
+	glDisableVertexAttribArray(aPos);
+	glDisableVertexAttribArray(aTex);
+}
+
+void Renderer::DrawNumber(int* number)
+{
+	GLuint shader = m_TextureRectShader;
+
+	glUseProgram(shader);
+
+	//Uniform inputs
+	GLuint uNumber = glGetUniformLocation(shader, "u_Number");
+	glUniform1iv(uNumber, 3, number);
+
+	//Vertex settings
+	GLuint aPos = glGetAttribLocation(shader, "Position");
+	GLuint aTex = glGetAttribLocation(shader, "TexPos");
+	glEnableVertexAttribArray(aPos);
+	glEnableVertexAttribArray(aTex);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTextureRect);
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(aTex, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float)*3));
+
+	//Texture settings
+	GLuint uTex = glGetUniformLocation(shader, "u_Texture");
+	glUniform1i(uTex, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_NumTexture);
+
+	//Draw here
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	//Restore to default
 	glDisableVertexAttribArray(aPos);
 	glDisableVertexAttribArray(aTex);
 }

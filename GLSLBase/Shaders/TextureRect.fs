@@ -1,5 +1,7 @@
 #version 450
 
+out vec4 FragColor;
+
 uniform sampler2D u_Texture;
 uniform sampler2D u_Texture1;
 uniform sampler2D u_Texture2;
@@ -9,7 +11,7 @@ in vec2 v_Tex;
 
 uniform float u_Time;
 
-out vec4 FragColor;
+uniform int u_Number[3];
 
 void main()
 {
@@ -64,7 +66,7 @@ void main()
 	// 위아래 반전 해결: 1.0-v_Tex.y
 
 	// Multiple Textures
-	vec4 newColor;
+	/*vec4 newColor;
 	vec2 newTex = vec2(v_Tex.x, 1.0-v_Tex.y);
 	
 	if(v_Tex.x < 0.5 && newTex.y < 0.5){
@@ -78,5 +80,26 @@ void main()
 	}
 	else if(v_Tex.x > 0.5 && newTex.y > 0.5){
 		FragColor = texture(u_Texture1, vec2(fract(newTex.x * 2), newTex.y*2));
-	}
+	}*/
+
+	/*vec4 newColor;
+	vec2 newTex = vec2(v_Tex.x, 1.0-v_Tex.y);
+	float newx = float(u_Number);
+	newTex.x = newTex.x/10.0 + newx/10.0;
+	newColor = texture(u_Texture, newTex);
+	FragColor = newColor;*/
+
+	vec2 newTex = v_Tex;
+
+	//x_tex coord
+	newTex.x = fract(newTex.x*3.0);
+
+	//cal index
+	int newIndex = int(floor(v_Tex.x*3.0));
+
+	float newx = float(u_Number[newIndex]);
+	newTex.x = newTex.x/10.0 + newx/10.0;
+	
+	vec4 newColor = texture(u_Texture, newTex);
+	FragColor = newColor;
 }

@@ -69,6 +69,7 @@ public:
 	void FillAll(float alpha);
 	void Lecture8();
 	void Lecture9(GLuint tex);
+	void DrawNumber(int* number);
 
 	void CreateTextures();
 
@@ -81,6 +82,7 @@ private:
 	GLuint m_LogoTexture = 0;
 	GLuint m_RGBTexture = 0;
 	GLuint m_NumTextures[10];
+	GLuint m_NumTexture;
 
 	GLuint m_VBOTextureRect = 0;
 

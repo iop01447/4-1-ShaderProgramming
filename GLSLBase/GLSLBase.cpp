@@ -35,7 +35,12 @@ void RenderScene(void)
 	//g_Renderer->Lecture6();
 	//g_Renderer->Lecture7();
 	//g_Renderer->Lecture8();
-	g_Renderer->Lecture9(0);
+	//g_Renderer->Lecture9(0);
+	static int gNum = 0;
+	int num[] = { 0,1,2 };
+	g_Renderer->DrawNumber(num);
+	//gNum++;
+	//Sleep(1000);
 
 	glutSwapBuffers();
 }
