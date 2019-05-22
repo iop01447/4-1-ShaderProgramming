@@ -4,19 +4,38 @@ in vec3 a_Position;
 
 uniform float gTime;
 
+const float PI = 3.14;
+out float v_Grey;
+out vec2 v_Tex;
+
 void main()
 {
-	vec3 temp=a_Position;
+	vec3 newPos = a_Position;
 
-	float o=sin(gTime+(-0.5)*5.0)*0.3*-1.0;
+	//0~1
+	float additionalValueX = newPos.x + 0.5; //0~1
+	float additionalValueY = newPos.y + 0.5; //0~1
 
-	float size=smoothstep(-0.5,0.5,temp.x);
-	size=1-size*0.7;
+	float periodX = 1.0 + (1.0 - additionalValueY) * 0.5;
+	float periodY = 1.0 + additionalValueX * 0.5;
 
-	temp.y+=sin(gTime+(temp.x)*5.0)*0.3+o;
-	temp.y*= size;
+	//x :: -0.5~0.5 --> +0.5 -> 0~1 -> * 2 * PI -> 0~2PI
+	float valueX = (additionalValueY * 2 * PI * periodX) - gTime*12.0;
+	float valueY = (additionalValueX * 2 * PI * periodY) - gTime*5.0;
+	
+	float sinValueX = sin(valueX) * 0.08;
+	float sinValueY = sin(valueY) * 0.2;
 
-	temp.x+=sin(gTime+(a_Position.y)*5.0)*smoothstep(-0.5,0.5,temp.x)*0.1;
+	//y scale
+	newPos.y = newPos.y * ((1.0 - additionalValueX) * 0.5 + 0.5);
 
-	gl_Position = vec4(temp, 1);
+	//x
+	newPos.x = newPos.x - sinValueX * additionalValueX;
+	//y
+	newPos.y = newPos.y + sinValueY * additionalValueX;
+
+	gl_Position = vec4(newPos.xyz, 1);
+
+	v_Grey = sinValueY + 0.5;
+	v_Tex = vec2(0.5, 0.5) + a_Position.xy; // 0~1, 0~1 tex coordinate
 }

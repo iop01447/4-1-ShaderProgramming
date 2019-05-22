@@ -2,9 +2,16 @@
 
 layout(location=0) out vec4 FragColor;
 
+uniform sampler2D u_Texture;
+
+in float v_Grey;
+in vec2 v_Tex;
+
+
 void main()
 {
-	vec4 color=vec4(0.2,0.65,0.7,1);
-	//color.xyz=gl_PointCoord.xyz;
-	FragColor = color;
+	//vec3 newColor = vec3(v_Grey);
+	//FragColor = vec4(newColor,1);
+
+	FragColor = texture(u_Texture, vec2(v_Tex.x, 1.0-v_Tex.y))*v_Grey;
 }

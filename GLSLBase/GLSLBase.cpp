@@ -57,9 +57,9 @@ void RenderScene(void)
 	//g_Renderer->TestFill();
 	//g_Renderer->TestWhiteRect(testtime);
 	//g_Renderer->TestMoveX(testtime);
-	g_Renderer->TestUVRect(testtime);
-	g_Renderer->TestNumDrawO(testtime, floor(testtime * 1000));
-	g_Renderer->TestNumDraw(testtime,floor(testtime*100));
+	//g_Renderer->TestUVRect(testtime);
+	//g_Renderer->TestNumDrawO(testtime, floor(testtime * 1000));
+	//g_Renderer->TestNumDraw(testtime,floor(testtime*100));
 
 	g_Renderer->Test_CULINE(testtime*30);
 	glutSwapBuffers();

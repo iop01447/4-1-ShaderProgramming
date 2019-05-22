@@ -128,7 +128,7 @@ void Renderer::CreateVertexBufferObjects()
 	//바닥스트립 그리기
 	{
 
-		const UINT quadsize{ 10 };
+		const UINT quadsize{50 };
 		const float quadsizef{ (1.f / quadsize) * 1.f };
 		for (int i = 0; i < quadsize; i++)
 		{
@@ -211,6 +211,87 @@ void Renderer::CreateVertexBufferObjects()
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect[6]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rect3), rect3, GL_STATIC_DRAW);
+}
+
+int gDummyVertexCount = 0;
+void Renderer::GenGrid()
+{
+	float basePosX = -0.5f;
+	float basePosY = -0.5f;
+	float targetPosX = 0.5f;
+	float targetPosY = 0.5f;
+
+	int pointCountX = 8;
+	int pointCountY = 8;
+
+	float width = targetPosX - basePosX;
+	float height = targetPosY - basePosY;
+
+	float* point = new float[pointCountX*pointCountY * 2];
+	float* vertices = new float[(pointCountX - 1)*(pointCountY - 1) * 2 * 3 * 3];
+	gDummyVertexCount = (pointCountX - 1)*(pointCountY - 1) * 2 * 3;
+
+	//Prepare points
+	for (int x = 0; x < pointCountX; x++)
+	{
+		for (int y = 0; y < pointCountY; y++)
+		{
+			point[(y*pointCountX + x) * 2 + 0] = basePosX + width * (x / (float)(pointCountX - 1));
+			point[(y*pointCountX + x) * 2 + 1] = basePosY + height * (y / (float)(pointCountY - 1));
+		}
+	}
+
+	//Make triangles
+	int vertIndex = 0;
+	for (int x = 0; x < pointCountX - 1; x++)
+	{
+		for (int y = 0; y < pointCountY - 1; y++)
+		{
+			//Triangle part 1
+			vertices[vertIndex] = point[(y*pointCountX + x) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[(y*pointCountX + x) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1)*pointCountX + (x + 1)) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1)*pointCountX + (x + 1)) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1)*pointCountX + x) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1)*pointCountX + x) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+
+			//Triangle part 2
+			vertices[vertIndex] = point[(y*pointCountX + x) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[(y*pointCountX + x) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+			vertices[vertIndex] = point[(y*pointCountX + (x + 1)) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[(y*pointCountX + (x + 1)) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1)*pointCountX + (x + 1)) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1)*pointCountX + (x + 1)) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+		}
+	}
+
+	glGenBuffers(1, &VBO_DummyMesh);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_DummyMesh);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(pointCountX - 1)*(pointCountY - 1) * 2 * 3 * 3, vertices, GL_STATIC_DRAW);
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -411,7 +492,7 @@ void Renderer::JHCreateTex()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 8, 8, 0, GL_RGBA, GL_UNSIGNED_BYTE, &checkerboard[0]);
 
 	
-	char names[NUM_TEX][15]{ "asdf.png", "asdf1.png" , "asdf2.png" ,"asdf31.png","asdf3.png" };
+	char names[NUM_TEX][20]{ "asdf.png", "asdf1.png" , "asdf2.png" ,"asdf31.png","asdf3.png", "./Textures/cat.png" };
 
 	//glGenTextures(NUM_TEX, m_TestTexarr);
 	for (int i = 0; i < NUM_TEX; ++i)
@@ -484,15 +565,17 @@ void Renderer::Test_CULINE(float time)
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect[4]);
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 
-
 	GLint idTest = glGetUniformLocation(m_TEST0318Shader, "gTime");
-	glUniform1f(idTest, time);
+	glUniform1f(idTest, time/10);
 
-	glDrawArrays(GL_LINE_STRIP, 0, m_vb0size);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_TestTexarr[5]);
+
+	glDrawArrays(GL_TRIANGLES, 0, m_vb0size);
 
 	glDisableVertexAttribArray(attribPosition);
 }
-//
+
 //void Renderer::Test_0313(float time)
 //{
 //	glUseProgram(m_TEST0320ShaderBB);
