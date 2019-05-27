@@ -555,7 +555,7 @@ GLuint Renderer::CreateBmpTexture(char * filePath)
 
 void Renderer::Test_CULINE(float time)
 {
-	glLineWidth(3);
+//	glLineWidth(3);
 
 	glUseProgram(m_TEST0318Shader);
 
@@ -565,13 +565,16 @@ void Renderer::Test_CULINE(float time)
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect[4]);
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 
-	GLint idTest = glGetUniformLocation(m_TEST0318Shader, "gTime");
-	glUniform1f(idTest, time/10);
+	GLuint idTest = glGetUniformLocation(m_TEST0318Shader, "gTime");
+	glUniform1f(idTest, time);
+	GLuint uPoints = glGetUniformLocation(m_TEST0318Shader, "u_Points");
+	float points[] = { 0.0f, 0.0f, 0.2f, 0.35f, -0.4f, -0.33f, 0.1f, -0.27f, -4.5f, 2.7f };
+	glUniform2fv(uPoints, 5, points);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_TestTexarr[5]);
 
-	glDrawArrays(GL_TRIANGLES, 0, m_vb0size);
+	glDrawArrays(GL_LINE_STRIP, 0, m_vb0size); // GL_TRIANGLES/ GL_LINE_STRIP
 
 	glDisableVertexAttribArray(attribPosition);
 }
