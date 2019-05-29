@@ -80,5 +80,6 @@ private:
 	GLuint m_ParticleTexture2 = 0;
 
 	GLuint m_VBOTextureRect = 0;
+	GLuint m_VBOLine = 0;
 };
 

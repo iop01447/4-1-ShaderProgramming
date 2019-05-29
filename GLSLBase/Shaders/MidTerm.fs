@@ -9,7 +9,7 @@ uniform float u_Time;
 
 void main()
 {
-	float dis = sqrt(v_OriXY.x * v_OriXY.x + v_OriXY.y * v_OriXY.y);
+	/*float dis = sqrt(v_OriXY.x * v_OriXY.x + v_OriXY.y * v_OriXY.y);
 	vec4 newColor;
 	float rad = (1-u_Time)*1 + u_Time*v_Radius;
 	if(dis < rad){
@@ -18,5 +18,7 @@ void main()
 	else{
 		newColor = vec4(0,0,0,0);
 	}
-	FragColor = newColor;
+	FragColor = newColor;*/
+
+	FragColor = vec4(1,1,1,1);
 }

@@ -100,6 +100,17 @@ void Renderer::CreateVertexBufferObjects()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOLecture);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertex), triangleVertex, GL_STATIC_DRAW);
 
+	float Lines[]
+		=
+	{
+		-1.0, 0.0, 0.0, -0.72, 0.0, 0.0, -0.44, 0.0, 0.0, -0.16, 0.0, 0.0, 0.12, 0.0, 0.0,
+		0.40, 0.0, 0.0, 0.68, 0.0, 0.0, 1.0, 0.0, 0.0 // 8 x 3 floats
+	};
+
+	glGenBuffers(1, &m_VBOLine);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOLine);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Lines), Lines, GL_STATIC_DRAW);
+
 	GenQuadsVBO(1000, true, &m_VBOQuads, &m_VBOQuads_VertexCount);
 	GenQuadsVBO(1000, false, &m_VBOQuads1, &m_VBOQuads_VertexCount1);
 	CreateGridMesh();
@@ -807,11 +818,11 @@ void Renderer::MidTermTest()
 
 	glEnableVertexAttribArray(aPos);
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOLine);
 
-	glVertexAttribPointer(aPos, 3, GL_FLOAT, FALSE, sizeof(float) * 6, 0);
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, FALSE, sizeof(float) * 8, 0);
 
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDrawArrays(GL_LINES, 0, 4);
 
 	glDisableVertexAttribArray(aPos);
 }
