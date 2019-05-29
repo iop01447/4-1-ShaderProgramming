@@ -175,10 +175,8 @@
   <ItemGroup>
     <None Include="Shaders\FillAll.fs" />
     <None Include="Shaders\FillAll.vs" />
-    <None Include="Shaders\FSSandbox.fs" />
-    <None Include="Shaders\FSSandbox.vs" />
-    <None Include="Shaders\MidTerm.fs" />
-    <None Include="Shaders\MidTerm.vs" />
+    <None Include="Shaders\Line.fs" />
+    <None Include="Shaders\Line.vs" />
     <None Include="Shaders\SimpleVel.fs" />
     <None Include="Shaders\SimpleVel.vs" />
     <None Include="Shaders\SinTrail.fs" />

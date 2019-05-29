@@ -1,5 +1,5 @@
 #pragma once
-#define NUM_TEX 6
+#define NUM_TEX 5
 #include <string>
 #include <cstdlib>
 #include <fstream>
@@ -19,9 +19,7 @@ public:
 
 	GLuint CreatePngTexture(char * filePath);
 	GLuint CreateBmpTexture(char * filePath);
-	  
-	void GenGrid();
-
+	   
 	void Test_CULINE(float time);
 	//void Test_0313(float time);
 	void TestMoveX(float time);
@@ -50,7 +48,6 @@ private:
 	GLuint m_VBORect[6]{};
 	GLuint m_TestTexture;
 	GLuint m_TestTexarr[NUM_TEX];
-	GLuint VBO_DummyMesh;
 
 	GLuint m_SolidRectShader = 0;
 	GLuint m_TEST0318Shader = 0;
