@@ -41,6 +41,8 @@ private:
 
 	void JHCreateTex();
 
+	void InitMatrices();
+
 	bool m_Initialized = false;
 	
 	unsigned int m_WindowSizeX = 0;
@@ -62,5 +64,14 @@ private:
 	GLuint m_TestFill = 0;
 
 	GLuint m_TestSprite = 0;
+
+	//Matrices
+	glm::mat4 m_ViewMat4;
+	glm::mat4 m_OrthoProjMat4;
+	glm::mat4 m_ViewProjMat4;
+	glm::vec3 m_CameraPosVec3;
+	glm::vec3 m_CameraUpVec3;
+	glm::vec3 m_CameraLookatVec3;
+
 };
 

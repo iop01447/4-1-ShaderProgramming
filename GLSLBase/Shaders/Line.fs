@@ -10,8 +10,8 @@ in vec2 v_Tex;
 
 void main()
 {
-	//vec3 newColor = vec3(v_Grey);
-	//FragColor = vec4(newColor,1);
+	vec3 newColor = vec3(v_Grey);
+	FragColor = vec4(newColor,1);
 
-	FragColor = texture(u_Texture, vec2(v_Tex.x, 1.0-v_Tex.y))*v_Grey;
+	//FragColor = texture(u_Texture, vec2(v_Tex.x, 1.0-v_Tex.y))*v_Grey;
 }

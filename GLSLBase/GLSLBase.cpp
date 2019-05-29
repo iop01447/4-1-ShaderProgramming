@@ -61,7 +61,7 @@ void RenderScene(void)
 	//g_Renderer->TestNumDrawO(testtime, floor(testtime * 1000));
 	//g_Renderer->TestNumDraw(testtime,floor(testtime*100));
 
-	g_Renderer->Test_CULINE(testtime * 10);
+	g_Renderer->Test_CULINE(testtime);
 	glutSwapBuffers();
 }
 

@@ -40,6 +40,23 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Create VBOs
 	CreateVertexBufferObjects();
 	JHCreateTex();
+
+	//Init Matrices
+	InitMatrices();
+}
+
+void Renderer::InitMatrices()
+{
+	//Calc ortho projection matrix
+	m_OrthoProjMat4 = glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 2.f);
+
+	//Calc view matrix
+	m_CameraPosVec3 = glm::vec3(0.f, -1.f, 0.f); // 0 -1 0 
+	m_CameraUpVec3 = glm::vec3(0.f, 0.f, 1.f); // 0 0 0
+	m_CameraLookatVec3 = glm::vec3(0.f, 0.f, 0.f); // 0 0 1
+	m_ViewMat4 = glm::lookAt(m_CameraPosVec3, m_CameraLookatVec3, m_CameraUpVec3);
+
+	m_ViewProjMat4 = m_OrthoProjMat4 * m_ViewMat4;
 }
 
 void Renderer::CreateVertexBufferObjects()
@@ -566,15 +583,17 @@ void Renderer::Test_CULINE(float time)
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 
 	GLuint idTest = glGetUniformLocation(m_TEST0318Shader, "gTime");
-	glUniform1f(idTest, time);
+	glUniform1f(idTest, time/30);
 	GLuint uPoints = glGetUniformLocation(m_TEST0318Shader, "u_Points");
 	float points[] = { 0.0f, 0.0f, 0.2f, 0.35f, -0.4f, -0.33f, 0.1f, -0.27f, -4.5f, 2.7f };
 	glUniform2fv(uPoints, 5, points);
+	GLuint uViewProjMat = glGetUniformLocation(m_TEST0318Shader, "u_ViewProjMat");
+	glUniformMatrix4fv(uViewProjMat, 1, GL_FALSE, &m_ViewProjMat4[0][0]);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_TestTexarr[5]);
 
-	glDrawArrays(GL_LINE_STRIP, 0, m_vb0size); // GL_TRIANGLES/ GL_LINE_STRIP
+	glDrawArrays(GL_TRIANGLES, 0, m_vb0size); // GL_TRIANGLES/ GL_LINE_STRIP
 
 	glDisableVertexAttribArray(attribPosition);
 }

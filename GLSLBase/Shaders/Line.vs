@@ -4,6 +4,7 @@ in vec3 a_Position;
 
 uniform float gTime;
 uniform vec2 u_Points[5];
+uniform mat4 u_ViewProjMat;
 
 const float PI = 3.14;
 out float v_Grey;
@@ -35,7 +36,8 @@ void Flag()
 	//y
 	newPos.y = newPos.y + sinValueY * additionalValueX;
 
-	gl_Position = vec4(newPos.xyz, 1);
+	//gl_Position = vec4(newPos.xyz, 1);
+	gl_Position = vec4(newPos.xyz, 1.0) * u_ViewProjMat;
 
 	v_Grey = sinValueY + 0.5;
 	v_Tex = vec2(0.5, 0.5) + a_Position.xy; // 0~1, 0~1 tex coordinate
@@ -55,9 +57,9 @@ void Wave()
 		grey += sin(dis - gTime);
 	}
 
-	newPos.z += grey * 0.5; // 클리핑 되어서 이렇게 보임...
+	newPos.z += grey * 0.1; // 0.5 / 클리핑 되어서 이렇게 보임...
 
-	gl_Position = vec4(newPos.xyz, 1);
+	gl_Position = vec4(newPos.xyz, 1) * u_ViewProjMat;
 
 	v_Grey = (grey + 1.0)/2.0;
 	v_Tex = vec2(0.5, 0.5) + a_Position.xy;
@@ -95,13 +97,20 @@ void SphereMapping()
 	float interpol = fract(gTime/100);
 	vec3 newPos = mix(originPos, spherePos, interpol);
 
-	gl_Position = vec4(spherePos.xyz, 1);
+	gl_Position = vec4(spherePos.xyz, 1) * u_ViewProjMat;
+	v_Grey = 1;
+}
+
+void Proj()
+{
+	gl_Position = vec4(a_Position, 1.0) * u_ViewProjMat;
 	v_Grey = 1;
 }
 
 void main()
 {
-	//Flag();
+	Flag();
 	//Wave();
-	SphereMapping();
+	//SphereMapping();
+	//Proj();
 }
