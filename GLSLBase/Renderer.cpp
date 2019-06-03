@@ -36,10 +36,13 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//m_TESTShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRectTest.fs");
 	//m_TEST0318Shader = CompileShaders("./Shaders/SolidRectTest.vs", "./Shaders/SolidRectTest.fs");
 	//m_TEST0320ShaderBB = CompileShaders("./Shaders/SolidRectTest2.vs", "./Shaders/SolidRectTest.fs");
-	
+
 	//Create VBOs
 	CreateVertexBufferObjects();
 	JHCreateTex();
+	m_HeightMap = CreatePngTexture("./Textures/heightmap.png");
+	m_GrassTexture = CreatePngTexture("./Textures/grass.png");
+	m_SnowTexture = CreatePngTexture("./Textures/snow.png");
 
 	//Init Matrices
 	InitMatrices();
@@ -49,14 +52,16 @@ void Renderer::InitMatrices()
 {
 	//Calc ortho projection matrix
 	m_OrthoProjMat4 = glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 2.f);
+	m_PersProjMat4 = glm::perspective(3.141592f * 0.5f, 1.f, 0.001f, 100.f);
 
 	//Calc view matrix
-	m_CameraPosVec3 = glm::vec3(0.f, -1.f, 0.f); // 0 -1 0 
-	m_CameraUpVec3 = glm::vec3(0.f, 0.f, 1.f); // 0 0 0
-	m_CameraLookatVec3 = glm::vec3(0.f, 0.f, 0.f); // 0 0 1
+	m_CameraPosVec3 = glm::vec3(0.f, -1.f, 0.2f); // 0 -1 0 
+	m_CameraUpVec3 = glm::vec3(0.f, 0.f, 1.f); // 0 0 1
+	m_CameraLookatVec3 = glm::vec3(0.f, 0.f, 0.f); // 0 0 0
 	m_ViewMat4 = glm::lookAt(m_CameraPosVec3, m_CameraLookatVec3, m_CameraUpVec3);
 
-	m_ViewProjMat4 = m_OrthoProjMat4 * m_ViewMat4;
+	//m_ViewProjMat4 = m_OrthoProjMat4 * m_ViewMat4;
+	m_ViewProjMat4 = m_PersProjMat4 * m_ViewMat4;
 }
 
 void Renderer::CreateVertexBufferObjects()
@@ -587,11 +592,24 @@ void Renderer::Test_CULINE(float time)
 	GLuint uPoints = glGetUniformLocation(m_TEST0318Shader, "u_Points");
 	float points[] = { 0.0f, 0.0f, 0.2f, 0.35f, -0.4f, -0.33f, 0.1f, -0.27f, -4.5f, 2.7f };
 	glUniform2fv(uPoints, 5, points);
+	int uHeight = glGetUniformLocation(m_TEST0318Shader, "u_heightMapTexture");
+	glUniform1i(uHeight, 1);
+	int uSnow = glGetUniformLocation(m_TEST0318Shader, "u_TextureSnow");
+	glUniform1i(uSnow, 2);
+	int uGrass = glGetUniformLocation(m_TEST0318Shader, "u_TextureGrass");
+	glUniform1i(uGrass, 3);
+
 	GLuint uViewProjMat = glGetUniformLocation(m_TEST0318Shader, "u_ViewProjMat");
 	glUniformMatrix4fv(uViewProjMat, 1, GL_FALSE, &m_ViewProjMat4[0][0]);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_TestTexarr[5]);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_HeightMap);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, m_SnowTexture);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, m_GrassTexture);
 
 	glDrawArrays(GL_TRIANGLES, 0, m_vb0size); // GL_TRIANGLES/ GL_LINE_STRIP
 

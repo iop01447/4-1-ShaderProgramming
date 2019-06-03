@@ -5,6 +5,7 @@ in vec3 a_Position;
 uniform float gTime;
 uniform vec2 u_Points[5];
 uniform mat4 u_ViewProjMat;
+uniform sampler2D u_heightMapTexture;
 
 const float PI = 3.14;
 out float v_Grey;
@@ -59,7 +60,7 @@ void Wave()
 
 	newPos.z += grey * 0.1; // 0.5 / 클리핑 되어서 이렇게 보임...
 
-	gl_Position = vec4(newPos.xyz, 1) * u_ViewProjMat;
+	gl_Position = u_ViewProjMat * vec4(newPos.xyz, 1);
 
 	v_Grey = (grey + 1.0)/2.0;
 	v_Tex = vec2(0.5, 0.5) + a_Position.xy;
@@ -97,20 +98,41 @@ void SphereMapping()
 	float interpol = fract(gTime/100);
 	vec3 newPos = mix(originPos, spherePos, interpol);
 
-	gl_Position = vec4(spherePos.xyz, 1) * u_ViewProjMat;
+	gl_Position = u_ViewProjMat * vec4(spherePos.xyz, 1);
 	v_Grey = 1;
 }
 
 void Proj()
 {
-	gl_Position = vec4(a_Position, 1.0) * u_ViewProjMat;
+	gl_Position = u_ViewProjMat * vec4(a_Position, 1.0);
 	v_Grey = 1;
+}
+
+void Basic()
+{
+	gl_Position = vec4(a_Position, 1.0);
+	v_Grey = 1;
+	v_Tex = vec2(0.5, 0.5) + a_Position.xy;
+}
+
+void HeightMap()
+{
+	vec2 newUV = a_Position.xy + vec2(0.5 + gTime*0.1, 0.5);
+	//vec2 newUV = a_Position.xy + vec2(0.5, 0.5);
+	float height = texture(u_heightMapTexture, newUV).r;
+	vec3 newPos = vec3(a_Position.xy, a_Position.z + height * 0.2);
+
+	gl_Position = u_ViewProjMat * vec4(newPos, 1.0);
+	v_Grey = height;
+	v_Tex = newUV;
 }
 
 void main()
 {
-	Flag();
+	//Flag();
 	//Wave();
 	//SphereMapping();
-	//Proj();
+	Proj();
+	//Basic();
+	HeightMap();
 }

@@ -53,6 +53,9 @@ private:
 	GLuint m_TestTexture;
 	GLuint m_TestTexarr[NUM_TEX];
 	GLuint VBO_DummyMesh;
+	GLuint m_HeightMap;
+	GLuint m_GrassTexture;
+	GLuint m_SnowTexture;
 
 	GLuint m_SolidRectShader = 0;
 	GLuint m_TEST0318Shader = 0;
@@ -68,6 +71,7 @@ private:
 	//Matrices
 	glm::mat4 m_ViewMat4;
 	glm::mat4 m_OrthoProjMat4;
+	glm::mat4 m_PersProjMat4;
 	glm::mat4 m_ViewProjMat4;
 	glm::vec3 m_CameraPosVec3;
 	glm::vec3 m_CameraUpVec3;
