@@ -19,7 +19,7 @@ public:
 
 	GLuint CreatePngTexture(char * filePath);
 	GLuint CreateBmpTexture(char * filePath);
-	  
+
 	void GenGrid();
 
 	void Test_CULINE(float time);
@@ -63,6 +63,7 @@ private:
 	//GLuint m_TEST0318Shader = 0;
 	//GLuint m_TEST0320ShaderBB = 0;
 	GLuint m_TEST0320ShaderMoveX = 0;
+	GLuint m_SinTrailShader = 0;
 	GLuint m_TestRectWhite = 0;
 	GLuint m_TestFill = 0;
 

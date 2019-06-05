@@ -8,7 +8,7 @@ in float m_Time;
 const int c_Size=5;
 uniform vec2 c_Point[5];
 
-void main()
+void Render()
 {
 	float distance =sqrt(v_Pos.x*v_Pos.x+v_Pos.y*v_Pos.y);
 
@@ -38,6 +38,23 @@ void main()
 
 
 	FragColor = color +PointColor;
+}
 
+void Waves()
+{
+	vec4 newColor = vec4(0);
+	vec2 newUV = v_Pos.xy - vec2(0.5, 0.5);
+	for(int i=0; i<5; ++i)
+	{
+		vec2 newPoint = c_Point[i];
+		vec2 newVec = newPoint - newUV;
+		float distance = length(newVec) * 8 * 3.141592 - gTime;
+		newColor += vec4(sin(distance));
+	}
+	FragColor = newColor;
+}
 
+void main()
+{
+	Waves();
 }

@@ -10,6 +10,8 @@ uniform sampler2D u_heightMapTexture;
 const float PI = 3.14;
 out float v_Grey;
 out vec2 v_Tex;
+out vec3 v_Norm;
+out vec3 v_Pos;
 
 void Flag()
 {
@@ -117,14 +119,42 @@ void Basic()
 
 void HeightMap()
 {
-	vec2 newUV = a_Position.xy + vec2(0.5 + gTime*0.1, 0.5);
-	//vec2 newUV = a_Position.xy + vec2(0.5, 0.5);
+	//vec2 newUV = a_Position.xy + vec2(0.5 + gTime*0.1, 0.5);
+	vec2 newUV = a_Position.xy + vec2(0.5, 0.5);
 	float height = texture(u_heightMapTexture, newUV).r;
 	vec3 newPos = vec3(a_Position.xy, a_Position.z + height * 0.2);
 
 	gl_Position = u_ViewProjMat * vec4(newPos, 1.0);
 	v_Grey = height;
 	v_Tex = newUV;
+}
+
+void HeightMap2()
+{
+	float gap = 2.0/100.0;
+
+	vec2 newUV = a_Position.xy + vec2(0.5, 0.5);
+	vec2 newUVRight = a_Position.xy + vec2(0.5, 0.5) + vec2(gap, 0.0); // 0~1
+	vec2 newUVUp = a_Position.xy + vec2(0.5, 0.5) + vec2(0.0, gap); // 0~1
+
+	float height = texture(u_heightMapTexture, newUV).r;
+	float heightRight = texture(u_heightMapTexture, newUVRight).r;
+	float heightUp = texture(u_heightMapTexture, newUVUp).r;
+
+	vec3 newPos = vec3(a_Position.xy, a_Position.z + height * 0.2);
+	vec3 newPosRight = vec3(a_Position.xy + vec2(gap, 0.0), a_Position.z + heightRight * 0.2);
+	vec3 newPosUp = vec3(a_Position.xy + vec2(0.0, gap), a_Position.z + heightUp * 0.2);
+
+	vec3 diff1 = newPosRight - newPos;
+	vec3 diff2 = newPosUp - newPos;
+
+	vec3 norm = cross(diff1, diff2); // ³ë¸»
+
+	gl_Position = u_ViewProjMat * vec4(newPos, 1.0);
+	v_Grey = height;
+	v_Tex = newUV;
+	v_Norm = normalize(norm);
+	v_Pos = newPos;
 }
 
 void main()
@@ -134,5 +164,7 @@ void main()
 	//SphereMapping();
 	Proj();
 	//Basic();
-	HeightMap();
+	//HeightMap();
+	HeightMap2();
+
 }

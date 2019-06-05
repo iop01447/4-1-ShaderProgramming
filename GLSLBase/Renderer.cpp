@@ -36,11 +36,12 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//m_TESTShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRectTest.fs");
 	//m_TEST0318Shader = CompileShaders("./Shaders/SolidRectTest.vs", "./Shaders/SolidRectTest.fs");
 	//m_TEST0320ShaderBB = CompileShaders("./Shaders/SolidRectTest2.vs", "./Shaders/SolidRectTest.fs");
+	m_SinTrailShader = CompileShaders("./Shaders/SinTrail.vs", "./Shaders/SinTrail.fs");
 
 	//Create VBOs
 	CreateVertexBufferObjects();
 	JHCreateTex();
-	m_HeightMap = CreatePngTexture("./Textures/heightmap.png");
+	m_HeightMap = CreatePngTexture("./Textures/heightmap2.png");
 	m_GrassTexture = CreatePngTexture("./Textures/grass.png");
 	m_SnowTexture = CreatePngTexture("./Textures/snow.png");
 
@@ -55,7 +56,7 @@ void Renderer::InitMatrices()
 	m_PersProjMat4 = glm::perspective(3.141592f * 0.5f, 1.f, 0.001f, 100.f);
 
 	//Calc view matrix
-	m_CameraPosVec3 = glm::vec3(0.f, -1.f, 0.2f); // 0 -1 0 
+	m_CameraPosVec3 = glm::vec3(0.f, -1.f, 0.3f); // 0 -1 0 
 	m_CameraUpVec3 = glm::vec3(0.f, 0.f, 1.f); // 0 0 1
 	m_CameraLookatVec3 = glm::vec3(0.f, 0.f, 0.f); // 0 0 0
 	m_ViewMat4 = glm::lookAt(m_CameraPosVec3, m_CameraLookatVec3, m_CameraUpVec3);
