@@ -38,8 +38,8 @@ but WITHOUT ANY WARRANTY.
 
 Renderer *g_Renderer = NULL;
 
-int g_WindowSizeX = 500;
-int g_WindowSizeY = 500;
+int g_WindowSizeX = 1024; // 500
+int g_WindowSizeY = 1024; // 500
 
 bool test{ true };
 bool test2{ true };
@@ -50,8 +50,8 @@ static std::chrono::time_point<std::chrono::high_resolution_clock> otime;
 void RenderScene(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClear(GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+	glViewport(0, 0, 512, 512);
 
 	//Renderer Test
 	//g_Renderer->TestFill();
@@ -60,8 +60,10 @@ void RenderScene(void)
 	//g_Renderer->TestUVRect(testtime);
 	//g_Renderer->TestNumDrawO(testtime, floor(testtime * 1000));
 	//g_Renderer->TestNumDraw(testtime,floor(testtime*100));
-
-	g_Renderer->Test_CULINE(testtime * 30);
+	//g_Renderer->Test_CULINE(testtime * 30);
+	//g_Renderer->DrawTextureRect(0, 0, 0, 1, 1);
+	g_Renderer->TestFBO();
+		
 	glutSwapBuffers();
 }
 

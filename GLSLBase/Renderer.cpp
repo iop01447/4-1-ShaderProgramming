@@ -37,6 +37,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//m_TEST0318Shader = CompileShaders("./Shaders/SolidRectTest.vs", "./Shaders/SolidRectTest.fs");
 	//m_TEST0320ShaderBB = CompileShaders("./Shaders/SolidRectTest2.vs", "./Shaders/SolidRectTest.fs");
 	m_SinTrailShader = CompileShaders("./Shaders/SinTrail.vs", "./Shaders/SinTrail.fs");
+	m_TextureRectShader = CompileShaders("./Shaders/TextureRect.vs", "./Shaders/TextureRect.fs");
 
 	//Create VBOs
 	CreateVertexBufferObjects();
@@ -47,6 +48,12 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	//Init Matrices
 	InitMatrices();
+
+	//Cretae FBOs
+	m_FBO0 = CreateFBO(512, 512, &m_FBOTexture0);
+	m_FBO0 = CreateFBO(512, 512, &m_FBOTexture1);
+	m_FBO0 = CreateFBO(512, 512, &m_FBOTexture2);
+	m_FBO0 = CreateFBO(512, 512, &m_FBOTexture3);
 }
 
 void Renderer::InitMatrices()
@@ -887,4 +894,71 @@ void Renderer::TestNumDrawO(float time, int num)
 	glDisableVertexAttribArray(aUV);
 
 	//glDisable(GL_BLEND);
+}
+
+GLuint Renderer::CreateFBO(int sx, int sy, GLuint* tex)
+{
+	//Gen Render target
+	glGenTextures(1, &m_FBOTexture0);
+	glBindTexture(GL_TEXTURE_2D, m_FBOTexture0);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, sx, sy, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	*tex = 
+
+	//Gen depth buffer
+	glGenRenderbuffers(1, &m_DepthRenderBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, m_DepthRenderBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, sx, sy);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	GLuint tempFBO;
+	glGenFramebuffers(1, &tempFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, tempFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_FBOTexture0, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_DepthRenderBuffer);
+
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (status != GL_FRAMEBUFFER_COMPLETE)
+	{
+		std::cout << "Error while attacth fbo. \n";
+		return 0;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return tempFBO;
+}
+
+void Renderer::DrawTextureRect(GLuint tex, float x, float y, float sx, float sy)
+{
+	GLuint shader = m_TextureRectShader;
+
+	glUseProgram(shader);
+
+	static float g_Time = 0;
+	GLuint uTime = glGetUniformLocation(shader, "u_Time");
+	glUniform1f(uTime, g_Time);
+	g_Time += 0.01;
+//	GLu
+
+//	glDis
+}
+
+void Renderer::TestFBO()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO0);
+	glClearColor(1.0, 0.0, 0.0, 0.0);
+	glClearDepth(1.0f);
+	glViewport(0, 0, 512, 512);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//VSSendbox();
+	Test_CULINE(0 * 30);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, 1024, 1024);
+	DrawTextureRect(m_FBOTexture0, 0, 0, 1, 1);
 }

@@ -30,6 +30,9 @@ public:
 	void TestUVRect(float time);
 	void TestNumDraw(float time, int num);
 	void TestNumDrawO(float time,int num);
+	void Renderer::DrawTextureRect(GLuint tex, float x, float y, float sx, float sy);
+	GLuint CreateFBO(int sx, int sy, GLuint* tex);
+	void TestFBO();
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
@@ -38,6 +41,7 @@ private:
 	GLuint CompileShaders(char* filenameVS, char* filenameFS);
 	void CreateVertexBufferObjects(); 
 	unsigned char * Renderer::loadBMPRaw(const char * imagepath, unsigned int& outWidth, unsigned int& outHeight);
+
 
 	void JHCreateTex();
 
@@ -66,8 +70,10 @@ private:
 	GLuint m_SinTrailShader = 0;
 	GLuint m_TestRectWhite = 0;
 	GLuint m_TestFill = 0;
+	GLuint m_TextureRectShader = 0;
 
 	GLuint m_TestSprite = 0;
+
 
 	//Matrices
 	glm::mat4 m_ViewMat4;
@@ -78,5 +84,13 @@ private:
 	glm::vec3 m_CameraUpVec3;
 	glm::vec3 m_CameraLookatVec3;
 
+	GLuint m_FBOTexture0 = 0;
+	GLuint m_FBOTexture1 = 0;
+	GLuint m_FBOTexture2 = 0;
+	GLuint m_FBOTexture3 = 0;
+	GLuint m_DepthRenderBuffer = 0;
+
+	//FrameBufferObjects
+	GLuint m_FBO0 = 0;
 };
 
